@@ -137,10 +137,10 @@ def main():
     hidden_scale = input_scale * scale_w1 * (2 ** args.shift_l1)
     q_b2 = quantize_bias_for_accum(b2, hidden_scale, scale_w2)
 
-    write_int8_hex(out_dir / 'weights_l1.txt', q_w1)
-    write_int8_hex(out_dir / 'weights_l2.txt', q_w2)
-    write_int32_hex(out_dir / 'biases_l1.txt', q_b1)
-    write_int32_hex(out_dir / 'biases_l2.txt', q_b2)
+    write_int8_hex(out_dir / 'weights_l1.mem', q_w1)
+    write_int8_hex(out_dir / 'weights_l2.mem', q_w2)
+    write_int32_hex(out_dir / 'biases_l1.mem', q_b1)
+    write_int32_hex(out_dir / 'biases_l2.mem', q_b2)
     write_params(out_dir / 'npu_params.vh', args.shift_l1, input_scale, scale_w1, scale_w2)
 
     print(f'model       : {model_path}')

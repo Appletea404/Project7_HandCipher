@@ -52,6 +52,7 @@ module spi(
     output reg idle);
 
     reg internalSck, cs;
+    reg spi_clk_en;
     reg[0:2] counter = 3'b0;
     reg[8:0] internalData;
     wire dataDc = internalData[8];
@@ -65,25 +66,33 @@ module spi(
             internalSck <= 1'b1;
             idle <= 1'b1;
             cs <= 1'b0;
+            spi_clk_en <= 1'b0;
         end
         else begin
+            // LCD SPI 속도를 낮추기 위해 기존 전송 FSM을 2클럭에 한 번만 진행한다.
+            // 100MHz 입력 기준 tft_sck는 약 50MHz에서 약 25MHz로 낮아진다.
+            spi_clk_en <= ~spi_clk_en;
+
             if (dataAvailable) begin
                 internalData <= data;
                 idle <= 1'b0;
             end
-            if (!idle)begin
-                internalSck <= !internalSck;
-                if (internalSck) begin
-                    tft_dc <= dataDc;
-                    tft_sdi <= dataShift[counter];
-                    cs <= 1'b1;
-                    counter <= counter + 1'b1;
-                    if(counter == 7)idle <= 1;
+
+            if (spi_clk_en) begin
+                if (!idle)begin
+                    internalSck <= !internalSck;
+                    if (internalSck) begin
+                        tft_dc <= dataDc;
+                        tft_sdi <= dataShift[counter];
+                        cs <= 1'b1;
+                        counter <= counter + 1'b1;
+                        if(counter == 7)idle <= 1;
+                    end
                 end
-            end
-            else begin
-                internalSck <= 1'b1;
-                if (internalSck) cs <= 1'b0;
+                else begin
+                    internalSck <= 1'b1;
+                    if (internalSck) cs <= 1'b0;
+                end
             end
         end
     end

@@ -63,10 +63,10 @@ def load_exported_weights(export_dir):
     export_dir = Path(export_dir)
 
     weights = {
-        'w1': read_int8_hex(export_dir / 'weights_l1.txt', (64, 784)),
-        'w2': read_int8_hex(export_dir / 'weights_l2.txt', (26, 64)),
-        'b1': read_int32_hex(export_dir / 'biases_l1.txt', (64,)),
-        'b2': read_int32_hex(export_dir / 'biases_l2.txt', (26,)),
+        'w1': read_int8_hex(export_dir / 'weights_l1.mem', (64, 784)),
+        'w2': read_int8_hex(export_dir / 'weights_l2.mem', (26, 64)),
+        'b1': read_int32_hex(export_dir / 'biases_l1.mem', (64,)),
+        'b2': read_int32_hex(export_dir / 'biases_l2.mem', (26,)),
     }
 
     return weights
