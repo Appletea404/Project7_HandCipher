@@ -69,56 +69,47 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
 
 ## 전체 파일 구조
 
-각 IP를 독립 Vivado 프로젝트에서 검증한 뒤 Custom IP로 패키징, TOP에서 통합한다.
+3개 IP의 RTL 검증을 IP_TEST 하나의 Vivado 프로젝트에서 모두 진행한 뒤, 각각 Custom IP로 패키징해 TOP에서 통합한다.
 
 ```
 Project_7_HandCipher/
 ├── Vivado/
-│   ├── NPU/                               ← Vivado 프로젝트 #1 (RTL 검증)
-│   │   ├── NPU.xpr
-│   │   ├── mem/
-│   │   │   ├── weights_l1.mem
-│   │   │   ├── weights_l2.mem
-│   │   │   ├── biases_l1.mem
-│   │   │   └── biases_l2.mem
-│   │   └── NPU.srcs/sources_1/new/
-│   │       ├── npu_params.vh              (quantize_export.py 생성)
-│   │       ├── npu_ctrl.v                 (EMNIST 추론 FSM)
-│   │       ├── image_buffer.v             (캔버스 BRAM, 듀얼포트)
-│   │       ├── weight_rom_l1.v
-│   │       ├── weight_rom_l2.v
-│   │       ├── bias_rom.v
-│   │       ├── npu_axi.v                  (AXI4-Lite 래퍼)
-│   │       └── tb_npu.v                   (XSim 검증용)
+│   ├── IP_TEST/                           ← Vivado 프로젝트 #1 (3개 IP RTL 검증)
+│   │   ├── IP_TEST.xpr
+│   │   ├── IP_TEST.srcs/sources_1/
+│   │   │   ├── imports/
+│   │   │   │   └── tft_lcd_sv.sv          (spi, xpt2046 재사용)
+│   │   │   └── new/
+│   │   │       ├── mem/                   (quantize_export.py 생성)
+│   │   │       │   ├── weights_l1.mem
+│   │   │       │   ├── weights_l2.mem
+│   │   │       │   ├── biases_l1.mem
+│   │   │       │   └── biases_l2.mem
+│   │   │       ├── npu_params.vh
+│   │   │       ├── npu_ctrl.v             (EMNIST 추론 FSM)
+│   │   │       ├── image_buffer.v         (캔버스 BRAM, 듀얼포트)
+│   │   │       ├── weight_rom_l1.v
+│   │   │       ├── weight_rom_l2.v
+│   │   │       ├── bias_rom.v
+│   │   │       ├── npu_axi.v              (NPU AXI4-Lite 래퍼)
+│   │   │       ├── tb_npu.v
+│   │   │       ├── canvas_display.v       (ILI9341 SPI 스트리밍)
+│   │   │       ├── draw_canvas.v          (터치 좌표 → BRAM Port A)
+│   │   │       ├── tft_axi.v              (TFT AXI4-Lite 래퍼)
+│   │   │       ├── tb_tft.v
+│   │   │       ├── font_rom.v
+│   │   │       ├── vga_ctrl.v             (640×480 타이밍 + 문자 렌더러)
+│   │   │       ├── vga_axi.v              (VGA AXI4-Lite 래퍼)
+│   │   │       └── tb_vga.v
+│   │   └── IP_TEST.srcs/constrs_1/
+│   │       └── imports/basys3.xdc
 │   │
-│   ├── TFT_LCD/                           ← Vivado 프로젝트 #2 (RTL 검증)
-│   │   ├── TFT_LCD.xpr
-│   │   └── TFT_LCD.srcs/sources_1/
-│   │       ├── imports/
-│   │       │   └── tft_lcd_sv.sv          (spi, xpt2046 재사용)
-│   │       └── new/
-│   │           ├── canvas_display.v       (ILI9341 SPI 스트리밍)
-│   │           ├── draw_canvas.v          (터치 좌표 → BRAM Port A)
-│   │           ├── tft_axi.v              (AXI4-Lite 래퍼)
-│   │           └── tb_tft.v               (XSim 검증용)
-│   │
-│   ├── VGA/                               ← Vivado 프로젝트 #3 (RTL 검증)
-│   │   ├── VGA.xpr
-│   │   └── VGA.srcs/sources_1/new/
-│   │       ├── font_rom.v
-│   │       ├── vga_ctrl.v                 (640×480 타이밍 + 문자 렌더러)
-│   │       ├── vga_axi.v                  (AXI4-Lite 래퍼)
-│   │       └── tb_vga.v                   (XSim 검증용)
-│   │
-│   └── TOP/                               ← Vivado 프로젝트 #4 (통합 + 패키징)
+│   └── TOP/                               ← Vivado 프로젝트 #2 (통합 + .xsa 생성)
 │       ├── TOP.xpr
-│       ├── TOP.srcs/sources_1/new/
-│       │   └── bd/                        (Block Design)
-│       │       MicroBlaze + AXI Interconnect
-│       │       + npu_ip (Custom IP)
-│       │       + tft_ip (Custom IP)
-│       │       + vga_ip (Custom IP)
-│       │       + AXI GPIO (buttons/switches)
+│       ├── TOP.srcs/sources_1/new/bd/     (Block Design)
+│       │   MicroBlaze + AXI Interconnect
+│       │   + npu_ip / tft_ip / vga_ip (Custom IP)
+│       │   + AXI GPIO (버튼 + 스위치)
 │       ├── TOP.srcs/constrs_1/new/
 │       │   └── basys3.xdc
 │       └── handcipher.xsa                 (Vitis로 내보내기)
@@ -131,8 +122,7 @@ Project_7_HandCipher/
 │       ├── display.c
 │       └── display.h
 └── training/
-    ├── requirements.txt
-    ├── train_emnist.py
+    ├── training_emnist.py                 (✅ 완료 → model.pth 생성됨)
     ├── quantize_export.py
     └── test_inference.py
 ```
@@ -423,60 +413,61 @@ void display_update(u32 base, char *plain, char *cipher, int len,
 
 ## 구현 순서
 
-### Phase 1 — 학습 (PC)
+### Phase 1 — 학습 (PC) ✅ model.pth 완료
 
-1. `training/requirements.txt`
-2. `train_emnist.py` → model.pth (≥85%)
-3. `quantize_export.py` → .mem 4개 + npu_params.vh
-4. `test_inference.py` → ≥80% 정수 시뮬레이션
+1. ~~`training_emnist.py` → model.pth~~ ✅ 완료
+2. `quantize_export.py` → .mem 4개 + npu_params.vh 생성
+3. `test_inference.py` → ≥80% 정수 시뮬레이션 확인
 
-### Phase 2 — NPU 프로젝트 (Vivado/NPU/)
+### Phase 2 — IP RTL 구현 및 검증 (Vivado/IP_TEST/)
 
-5. `npu_ctrl.v`, `weight_rom_l1.v`, `weight_rom_l2.v`, `bias_rom.v`, `image_buffer.v`
-6. `npu_axi.v` (AXI4-Lite 슬레이브 래퍼)
-7. `tb_npu.v` → XSim 검증: AXI start → done, RESULT 0~25 확인
-8. **Vivado: Tools → Create and Package New IP** → `npu_ip_v1_0` 패키징
+**NPU IP:**
 
-### Phase 3 — TFT_LCD 프로젝트 (Vivado/TFT_LCD/)
+4. `npu_ctrl.v`, `weight_rom_l1.v`, `weight_rom_l2.v`, `bias_rom.v`, `image_buffer.v`
+5. `npu_axi.v` (AXI4-Lite 래퍼)
+6. `tb_npu.v` → XSim: AXI start → done, RESULT 0~25 확인
+7. **Create and Package New IP** → `npu_ip_v1_0`
 
-9. `canvas_display.v`, `draw_canvas.v` (tft_lcd_sv.sv의 spi/xpt2046 재사용)
-10. `tft_axi.v` (AXI4-Lite 슬레이브 래퍼)
-11. `tb_tft.v` → XSim 검증: 터치 시뮬레이션 → BRAM Port A 쓰기 확인
-12. **Vivado: Create and Package New IP** → `tft_ip_v1_0` 패키징
+**TFT-LCD IP:**
 
-### Phase 4 — VGA 프로젝트 (Vivado/VGA/)
+8. `canvas_display.v`, `draw_canvas.v` (tft_lcd_sv.sv의 spi/xpt2046 재사용)
+9. `tft_axi.v` (AXI4-Lite 래퍼)
+10. `tb_tft.v` → XSim: 터치 시뮬레이션 → BRAM Port A 쓰기 확인
+11. **Create and Package New IP** → `tft_ip_v1_0`
 
-13. `font_rom.v`, `vga_ctrl.v` (640×480 @ 60Hz, 문자 렌더러)
-14. `vga_axi.v` (AXI4-Lite 슬레이브 래퍼)
-15. `tb_vga.v` → XSim 검증: AXI 문자 기록 → VGA 픽셀 스트림 확인
-16. **Vivado: Create and Package New IP** → `vga_ip_v1_0` 패키징
+**VGA IP:**
 
-### Phase 5 — TOP 통합 (Vivado/TOP/)
+12. `font_rom.v`, `vga_ctrl.v` (640×480 @ 60Hz, 문자 렌더러)
+13. `vga_axi.v` (AXI4-Lite 래퍼)
+14. `tb_vga.v` → XSim: AXI 문자 기록 → VGA 픽셀 스트림 확인
+15. **Create and Package New IP** → `vga_ip_v1_0`
 
-17. TOP 프로젝트 생성, IP Repository에 npu_ip / tft_ip / vga_ip 추가
-18. Block Design 생성:
+### Phase 3 — TOP 통합 (Vivado/TOP/)
+
+16. TOP 프로젝트 생성, IP Repository에 npu_ip / tft_ip / vga_ip 추가
+17. Block Design 생성:
     - MicroBlaze (32KB BRAM)
     - AXI Interconnect
     - npu_ip, tft_ip, vga_ip 각각 Add IP
     - AXI GPIO (버튼 + 스위치)
     - 캔버스 BRAM: tft_ip Port A ↔ npu_ip Port B 외부 연결
-19. `basys3.xdc` 핀 제약 추가
-20. 합성 + 구현 → BRAM18 ≤50, WNS ≥ 0 확인
-21. **File → Export → Export Hardware** → `handcipher.xsa` 생성
+18. `basys3.xdc` 핀 제약 추가
+19. 합성 + 구현 → BRAM18 ≤50, WNS ≥ 0 확인
+20. **File → Export → Export Hardware** → `handcipher.xsa` 생성
 
-### Phase 6 — Vitis C 코드 (Vitis/)
+### Phase 4 — Vitis C 코드 (Vitis/)
 
-22. Vitis에서 handcipher.xsa로 Platform 프로젝트 생성
-23. Application 프로젝트 생성 → `caesar.c` / `caesar.h`
-24. `display.c` / `display.h`
-25. `main.c`
-26. 빌드 + Basys3에 Program Device
+21. Vitis에서 handcipher.xsa로 Platform 프로젝트 생성
+22. Application 프로젝트 생성 → `caesar.c` / `caesar.h`
+23. `display.c` / `display.h`
+24. `main.c`
+25. 빌드 + Basys3에 Program Device
 
-### Phase 7 — 하드웨어 검증
+### Phase 5 — 하드웨어 검증
 
-27. 글자 그리기 → btnC → VGA 암호화 결과 확인
-28. SW[14]=1 복호화 모드 전환 확인
-29. SW[4:0] 시프트 값 변경 실시간 반영 확인
+26. 글자 그리기 → btnC → VGA 암호화 결과 확인
+27. SW[14]=1 복호화 모드 전환 확인
+28. SW[4:0] 시프트 값 변경 실시간 반영 확인
 
 ---
 
@@ -571,3 +562,58 @@ set_property IOSTANDARD LVCMOS33 [get_ports {clk sw[*] btn* vga_* tft_* touch_*}
 | `tft_sv`   | ❌ (캔버스 전용 스트리밍으로 대체) |
 | `lcd_bram` | ❌ (듀얼포트 image_buffer로 대체)  |
 | `xpt2046`  | ✅ 그대로 재사용 (50MHz 분주 공급) |
+
+---
+
+## IP_TEST TFT/Touch 검증 메모
+
+`Vivado/IP_TEST`에서 `tft_lcd_top_HY` 기반으로 TFT 터치 캔버스를 먼저 검증했다.
+
+### 제거한 디버그 기능
+
+- FND 좌표 표시 제거
+  - `tft_lcd_top_HY` 포트에서 `com`, `seg` 제거
+  - `bin_to_dec`, `FND_cntr` 인스턴스 제거
+  - XDC의 `seg[0..7]`, `com[0..3]` 제약 주석 처리
+
+### 터치 노이즈 관련 확인
+
+- 터치 핀을 물리적으로 분리하면 화면 지지직 노이즈가 사라짐
+- BRAM write를 꺼도 터치 시 노이즈가 남았으므로, 28x28 캔버스 write 문제가 아니라 터치 SPI 동작 자체가 LCD 표시 쪽에 간섭하는 것으로 판단
+- `PenIrq_n`에는 `PULLUP true` 적용
+- 터치 샘플링 주기를 기본 약 10ms에서 약 15ms로 완화
+
+```verilog
+xpt2046 #(
+    .CONV_TIMES(20),
+    .FILTER_PARAM(3),
+    .CNT_TOP(20'd749999)
+) touch_pad(...);
+```
+
+### 현재 가장 나은 설정
+
+- `CNT_TOP = 20'd749999`  
+  50MHz 기준 약 15ms 샘플링 간격
+- `CONV_TIMES = 20`  
+  기존 36회 평균보다 터치 SPI burst 시간을 줄임
+- `FILTER_PARAM = 3`  
+  20회 샘플에서 최대/최소 제거 후 8로 나누는 근사 평균
+- XPT2046 DCLK 분주값은 원래 값 유지
+  - `DIV_CNT == 5'd24`
+  - `5'd31`로 늦추면 오히려 노이즈가 심해졌음
+
+### BRAM write 정책
+
+- `PenIrq_n`이 눌린 동안 계속 쓰지 않음
+- `Get_Flag`가 발생한 시점의 좌표를 latch
+- 50MHz 터치 도메인에서 toggle 생성 후 100MHz `clk` 도메인으로 동기화
+- 새 샘플당 1클럭만 28x28 BRAM에 write
+- 3x3 브러시는 획이 너무 두꺼워져 EMNIST 인식에 불리할 수 있어 사용하지 않음
+
+### IP 제작 시 반영할 사항
+
+- TFT IP의 캔버스 write는 `Get_Flag` 기반 1회 write 구조 유지
+- `xpt2046`는 위 parameter 설정을 기본값으로 사용
+- FND/debug 출력은 IP에 포함하지 않음
+- 터치 노이즈가 다시 커지면 `CNT_TOP`을 12~20ms 범위에서 조정하며 보드 기준으로 재검증
