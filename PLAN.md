@@ -134,8 +134,8 @@ Project_7_HandCipher/
 │   │   │       ├── draw_canvas.v          (터치 좌표 → BRAM Port A)
 │   │   │       ├── tft_axi.v              (TFT AXI4-Lite 래퍼)
 │   │   │       ├── tb_tft.v
-│   │   │       ├── font_rom.v
-│   │   │       ├── vga_ctrl.v             (640×480 타이밍 + 문자 렌더러)
+│   │   │       ├── font_rom.v             (✅ 완료, tb_font_rom.v로 검증)
+│   │   │       ├── vga_ctrl.v             (640×480 타이밍 + 문자 렌더러) ← 다음 작업
 │   │   │       ├── vga_axi.v              (VGA AXI4-Lite 래퍼)
 │   │   │       └── tb_vga.v
 │   │   └── IP_TEST.srcs/constrs_1/
@@ -160,8 +160,9 @@ Project_7_HandCipher/
 │       └── display.h
 └── training/
     ├── training_emnist.py                 (✅ 완료 → model.pth 생성됨)
-    ├── quantize_export.py
-    └── test_inference.py
+    ├── quantize_export.py                 (✅ 완료 → .mem 4개 + npu_params.vh)
+    ├── test_inference.py                  (✅ 완료 → 정수 정확도 87.74%)
+    └── gen_font_mem.py                    (✅ 완료 → training/exported/font_rom.mem 생성)
 ```
 
 ---
@@ -276,7 +277,8 @@ output        done
 
 - 픽셀 클록: 100MHz ÷ 4 = 25MHz (클록 분주기 내장)
 - `H_TOTAL=800, V_TOTAL=525` (표준 640×480 @ 60Hz 타이밍)
-- 일반 모드: `char_buf[row*80+col]` → `font_rom[(char-32)*8+row_in]` → `pixel_on`
+- 일반 모드: `char_buf[row*80+col]` → `font_rom[char*8+row_in]` → `pixel_on`
+  - addr = char_code × 8 + row_in_char (offset 없음, ASCII 0~127 전체 저장)
 - 프리뷰 모드 (x: 16~239, y: 48~271): `canvas_buf[py*28+px]` → 흰/검 8×8 블록 렌더링
   - `px = (vga_x - 16) / 8` (0~27), `py = (vga_y - 48) / 8` (0~27)
   - 나머지 영역은 텍스트 그대로 유지 (인식 결과, 안내 문구)
@@ -595,10 +597,11 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 
 **VGA IP:**
 
-12. `font_rom.v`, `vga_ctrl.v` (640×480 @ 60Hz, 문자 렌더러)
-13. `vga_axi.v` (AXI4-Lite 래퍼)
-14. `tb_vga.v` → XSim: AXI 문자 기록 → VGA 픽셀 스트림 확인
-15. **Create and Package New IP** → `vga_ip_v1_0`
+12. ~~`font_rom.v`~~ ✅ + `font_rom.mem` ✅ (training/gen_font_mem.py로 생성, tb_font_rom.v로 시뮬레이션 검증 완료)
+13. `vga_ctrl.v` (640×480 @ 60Hz, 픽셀 클럭 분주 + 문자 렌더러) ← **다음 작업**
+14. `vga_axi.v` (AXI4-Lite 래퍼)
+15. `tb_vga.v` → XSim: AXI 문자 기록 → Hsync/Vsync 주기 + 픽셀 스트림 확인
+16. **Create and Package New IP** → `vga_ip_v1_0`
 
 ### Phase 3 — TOP 통합 (Vivado/TOP/)
 

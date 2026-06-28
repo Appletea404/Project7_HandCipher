@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tft_lcd_top_HY(
+module tft_lcd_top(
     input clk, reset_p,
     input tft_sdo, 
     output tft_sck, 
