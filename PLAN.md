@@ -886,3 +886,63 @@ xpt2046 #(
   - STATUS[2] = btn_ok sticky
   - STATUS[3] = btn_clear sticky
   - status read 또는 별도 clear 정책으로 sticky flag 정리
+
+
+
+
+
+
+HandCipher — FPGA Handwritten Letter Recognition & Caesar Cipher System (v6) [곽영재 - NPU 파트]ContextHandCipher — SoC-Based handwritten letter recognition and Caesar cipher system using a custom EMNIST NPU, touchscreen input and VGA output on Basys3.역할 분리:곽영재 (NPU 담당): EMNIST NPU 가속기 및 AXI Custom IP 설계, 고정소수점 양자화 알고리즘 소프트웨어 선행 검증 및 하드웨어 이식.Block Design 구성 (NPU 관점)┌─────────────────────────────────────────────────────┐
+│                  AXI Interconnect                   │
+│                                                     │
+│  MicroBlaze ──┬──► NPU IP      (0x43C0_0000)        │
+│  (32KB BRAM)  │                                     │
+└───────────────┼─────────────────────────────────────┘
+                │
+┌───────────────┴──────────────────────────────────────────────────┐
+│  캔버스 BRAM (Block Design 레벨, BRAM Generator IP)               │
+│                                                                  │
+│  TFT-LCD IP ──► bram_porta (write: 터치 픽셀 1-bit, addr 0~783) │
+│  NPU IP     ◄── bram_portb (read:  추론 시 픽셀 순차 읽기)       │
+│                                                                  │
+│  → MicroBlaze는 NPU_CTRL=1만 쓰면 됨 (784바이트 전송 불필요)    │
+│  → BRAM은 두 IP 사이의 공유 하드웨어로 Block Design에서 배선    │
+└──────────────────────────────────────────────────────────────────┘
+BRAM 리소스 (NPU 할당량)내용BRAM18NPU L1 weight ROM (784×64)25NPU L2 weight ROM (64×26)1캔버스 BRAM (28×28, 공유)1NPU 관련 합계27 / 100전체 파일 구조 (NPU 관련 파일)Project_7_HandCipher/
+├── Vivado/
+│   ├── IP_TEST/                           ← Vivado 프로젝트 #1 (RTL 검증)
+│   │   ├── IP_TEST.srcs/sources_1/new/
+│   │   │   ├── mem/                   (quantize_export.py 생성)
+│   │   │   │   ├── weights_l1.mem
+│   │   │   │   ├── weights_l2.mem
+│   │   │   │   ├── biases_l1.mem
+│   │   │   │   └── biases_l2.mem
+│   │   │   ├── npu_params.vh
+│   │   │   ├── npu_ctrl.v             (✅ 완료, EMNIST 추론 3단 FSM 코어 제어기)
+│   │   │   ├── weight_rom_l1.v        (✅ 완료, timescale 구문 제거 완료)
+│   │   │   ├── weight_rom_l2.v        (✅ 완료, timescale 구문 제거 완료)
+│   │   │   ├── bias_rom.v             (✅ 완료, timescale 구문 제거 완료)
+│   │   │   ├── npu_axi.v              (✅ 완료, NPU AXI4-Lite 슬레이브 래퍼)
+│   │   │   └── tb_npu.v               (✅ 완료, 157μs 연산 타이밍 하드웨어 시뮬레이션 검증)
+│   │
+│   └── TOP/                               ← Vivado 프로젝트 #2 (통합)
+│       └── [ip_repo/]                 (✅ 완료, HandCipher_EMNIST_NPU 부품 저장소)
+└── training/
+    ├── training_emnist.py                 (✅ 완료 → model.pth 생성됨)
+    ├── quantize_export.py                 (✅ 완료 → .mem 4개 + npu_params.vh)
+    └── test_inference.py                  (✅ 완료 → 정수 정확도 87.74%)
+Part 1: 학습 & 양자화 파이프라인 ✅ 완료 (정수 정확도 87.74%)데이터셋 및 신경망 구조EMNIST Letters: A~Z, 26클래스 사양 선정 및 전치 처리(.T) 적용.MLP 구조: $784(\text{Input}) \rightarrow 64(\text{Hidden}) \rightarrow 26(\text{Output})$ 레이어 매핑.양자화 계약L1: hidden[n] = clamp(relu(Σ(uint8(px)×int8(w1)) + bias_l1) >> SHIFT_L1, 0, 255)
+L2: score[o]  = Σ(uint8(hidden)×int8(w2)) + bias_l2   (o: 0~25)
+letter = argmax(score)  → 0=A, 25=Z
+Part 2: Custom IP 설계IP #1: npu_ip — NPU 추론 엔진 ✅ 패키징 완료AXI 레지스터 맵:0x00: CTRL    [0]=start (1 쓰면 추론 시작)
+0x04: STATUS  [0]=done, [1]=busy
+0x08: RESULT  [4:0]=letter (0~25, done=1일 때 유효)
+핵심 RTL 아키텍처 설계 사양:하드웨어 데이터 복원 로직: 외부 도화지 BRAM에서 넘어오는 1비트 정보를 가속기 내부 연산을 위해 0 $\rightarrow$ 0x00, 1 $\rightarrow$ 0xFF 형태의 8비트 uint8 픽셀 스케일 데이터로 하드웨어 자체 복원 디코딩 수행.연산 유닛 설계 아키텍처: 가중치 행렬 주소 연산 장치($\text{w1\_addr} = \text{hidden\_cnt} \times 784 + \text{pixel\_cnt}$) RTL 매핑 적용. 바이어스 덧셈, 고정소수점 스케일링용 >>> 10(우측 10비트 시프트), 언더플로우/오버플로우 가드용 Clamp(0, 255) ReLU 활성화 함수 회로 최적화 이식 완료.최댓값 추적 연산기: 26개 알파벳 스코어 중 최댓값을 실시간 비교 추적하여 가속 연산 종료와 동시에 RESULT 레지스터 갱신 로직 구현.npu_axi.v 외부 연동 포트 사양:Verilog// 캔버스 BRAM Port B (Block Design에서 BRAM Generator Port B에 직결)
+output [9:0]  canvas_addrb,
+output        canvas_enb,
+input         canvas_doutb,   // 1-bit
+
+// NPU 결과 출력 파이프라인
+output [4:0]  letter,
+output        done
+Part 4: 테스트벤치 검증tb_npu.v ✅ 검증 완료AXI write CTRL=1 $\rightarrow$ CALC_L1 모드 진입 및 가속 엔진 구동 타이밍 검증 완료.약 $157\mu\text{s}$의 전체 MAC 루프 동작 확인 후 STATUS done 검출 및 RESULT 유효 데이터 레지스터 출력 상태 도달 완료.구현 공정 내역 (NPU 파트)Phase 1 — 학습 (PC) ✅ 완료~~training_emnist.py → model.pth~~ ✅~~quantize_export.py → .mem 4개 + npu_params.vh~~ ✅ (SHIFT_L1=10)~~test_inference.py → 정수 시뮬레이션 정확도~~ ✅ 87.74% (목표 ≥80%)Phase 2 — IP RTL 구현 및 검증 (Vivado/IP_TEST/) ✅ 완료~~npu_ctrl.v, weight_rom_l1.v, weight_rom_l2.v, bias_rom.v, image_buffer.v~~ ✅~~npu_axi.v (AXI4-Lite 래퍼)~~ ✅~~tb_npu.v → XSim: AXI start → done, RESULT 0~25 확인~~ ✅~~Create and Package New IP → npu_ip_v1_0~~ ✅ (로컬 디렉토리 경로 지정 및 최상위 모듈 설정 완료)검증 기준 (NPU 파트)단계기준상태학습float ≥85%, 정수 시뮬레이션 ≥80%✅ 통과 (87.74%)NPU IPAXI start → done, RESULT 0~25✅ 통과 (XSim 완료)
