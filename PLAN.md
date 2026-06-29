@@ -135,8 +135,8 @@ Project_7_HandCipher/
 │   │   │       ├── tft_axi.v              (TFT AXI4-Lite 래퍼)
 │   │   │       ├── tb_tft.v
 │   │   │       ├── font_rom.v             (✅ 16×16 폰트 ROM)
-│   │   │       ├── vga_ctrl.v             (640×480 타이밍 + 문자 렌더러) ← 다음 작업
-│   │   │       ├── vga_axi.v              (VGA AXI4-Lite 래퍼)
+│   │   │       ├── vga_ctrl.v             (✅ 640×480 타이밍 + 문자 렌더러)
+│   │   │       ├── vga_axi.v              (✅ VGA AXI4-Lite 래퍼)
 │   │   │       └── tb_vga.v
 │   │   └── IP_TEST.srcs/constrs_1/
 │   │       └── imports/basys3.xdc
@@ -604,7 +604,7 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 14. ~~`tb_font_rom.v` 갱신 → 16×16 폰트 ROM 검증~~ ✅
 15. ~~`vga_ctrl.v` 수정 → 40×30 문자, `char*16+row`, 16-bit row 렌더러~~ ✅
 16. ~~`tb_vga.v` 갱신 → 16×16 문자 출력 + Hsync/Vsync 검증~~ ✅
-17. `vga_axi.v` (AXI4-Lite 래퍼, CHAR_ADDR 0~1199 기준) ← **다음 작업**
+17. ~~`vga_axi.v` 작성 → AXI4-Lite VGA 래퍼, CHAR_ADDR 0~1199 기준~~ ✅
 18. **Create and Package New IP** → `vga_ip_v1_0`
 
 ### Phase 3 — TOP 통합 (Vivado/TOP/)
@@ -672,41 +672,54 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 
 ## 작업 기록
 
-### 2026-06-29 기록 — 16×16 폰트 전환 완료
+### 2026-06-26 (목)
 
-- 기존 8×8 폰트 확대 방식은 글자가 각지고 깨져 보여서 폐기.
-- `training/gen_font_mem.py`를 16×16 ASCII 폰트 생성기로 수정.
-  - 출력: `training/exported/font_rom.mem`
-  - 형식: 2048 lines, 각 line은 16-bit row를 나타내는 4자리 hex
-  - 주소식: `addr = char_code * 16 + row_in_char`
-- Vivado용 `font_rom.mem` 복사본들을 모두 2048줄 16×16 형식으로 맞춤.
-  - `IP_TEST.srcs/sources_1/new/font_rom.mem`
-  - `IP_TEST.srcs/sources_1/imports/exported/font_rom.mem`
-  - `IP_TEST.ip_user_files/mem_init_files/font_rom.mem`
-  - `IP_TEST.sim/sim_1/behav/xsim/font_rom.mem`
-- `font_rom.v` 수정 완료.
-  - `addr[10:0]`, `data[15:0]`, `mem[0:2047]`
-- `vga_ctrl.v` 수정 완료.
-  - 640×480 @ 60Hz 유지
-  - 16×16 폰트 기준 40×30 문자 화면
-  - `font_addr = {char_code[6:0], char_y[3:0]}`
-  - `font_data[15 - char_x]`로 픽셀 선택
-  - 문자 버퍼 주소 범위: 0~1199
-- `tb_font_rom.v`, `tb_vga.v` 갱신 및 검증 완료.
-  - `tb_font_rom`: XSim run 완료
-  - `tb_vga`: `PASS: tb_vga completed`
-- 보드 테스트 결과: 16×16 폰트 출력 정상 확인.
-- `Vivado/IP_TEST/IP_TEST.xpr` merge 후 XML 오류 복구 완료.
-  - 원인: `font_rom.v` File 블록의 `</File>` 누락으로 line 192에서 XML mismatched tag 발생
-  - 조치: `font_rom.v` FileInfo/UsedIn 항목과 닫는 태그 복구
-  - 검증: Python XML parser 기준 `XML OK`
-- 현재 VGA 관련 파일 상태:
-  - `training/gen_font_mem.py`: 16×16 ASCII font mem 생성
-  - `font_rom.mem`: 2048 lines, 4 hex digits/line
-  - `font_rom.v`: 11-bit addr, 16-bit data, 2048-depth ROM
-  - `vga_ctrl.v`: 640×480 @60Hz, 40×30 text, 16×16 font render, 28×28 preview 유지
-  - `vga_test_top.v`: PLAN CONFIRMING 화면 형태의 standalone VGA test top
-  - `tb_font_rom.v`, `tb_vga.v`: 16×16 기준 XSim 검증 완료
+| 시각 | 커밋 | 내용 |
+|------|------|------|
+| 14:37 | `00e1f65` | **프로젝트 초기화** — 폴더 구조 생성, PLAN.md 초안 작성 |
+| 15:02 | `bf2c48c` | **PLAN.md 수정** — 설계 방향 조정 |
+| 16:25 | `4d67a21` | **`training_emnist.py` 작성** — EMNIST Letters 학습, model.pth 생성 (float 정확도 확인) |
+| 17:23 | `a940434` | **`quantize_export.py` / `test_inference.py` 작성** — 고정소수점 양자화, .mem 4개 + npu_params.vh 생성, 정수 정확도 **87.74%** 확인 |
+
+### 2026-06-27 (금)
+
+| 시각 | 커밋 | 내용 |
+|------|------|------|
+| 14:52 | `0f748bc` | **폴더 구조 정리** — Vivado 프로젝트 디렉토리 재배치 |
+| 15:34 | `d899f8a` | **IP_TEST 업로드** — TFT LCD 캔버스/터치 검증용 초기 파일 업로드 |
+| 16:42 | `15b40aa` | **가중치 .mem 파일 추가 + 터치 노이즈 문서화** — `weights_l1/l2.mem`, `biases_l1/l2.mem` 추가, XPT2046 노이즈 이슈 PLAN.md에 정리 |
+| 16:49 | `d3e9d18` | **PLAN.md 조정** — TFT IP 설계 사양 보완 |
+
+### 2026-06-28 (토)
+
+| 시각 | 커밋 | 내용 |
+|------|------|------|
+| 14:41 | `26653cc` | **TFT 타이밍 오류 수정 + `font_rom.v` 작성** — LCD SPI 속도 25MHz로 낮춰 화면 노이즈 개선, 8×8 폰트 ROM 초안 작성 |
+| 16:03 | `9a225f0` | **`font_rom.mem` 생성 + `tb_font_rom.v` 작성** — gen_font_mem.py로 mem 파일 생성, 폰트 ROM 테스트벤치 XSim 검증 |
+| 16:57 | `20d2883` | **`vga_ctrl.v` 수정** — 640×480 @60Hz 타이밍, 16×16 폰트 기준 40×30 문자 렌더러 구현 |
+
+### 2026-06-29 (일)
+
+| 시각 | 커밋 | 내용 |
+|------|------|------|
+| 09:51 | `21fb4b1` | **`requirements.txt` 추가** — 학습 환경 패키지 목록 정리 |
+| 10:34 | `e300fc9` | **`IP_TEST.xpr` 수정** — Vivado 프로젝트 파일 XML 오류 복구 (`font_rom.v` `</File>` 누락 태그 복원) |
+| 12:36 | `8f7321b` | **NPU IP RTL 작성** — `npu_ctrl.v`, `npu_axi.v`, `weight_rom_l1/l2.v`, `bias_rom_l1/l2.v`, `tb_npu.v` 작성, XSim 검증 (157μs 추론 타이밍 확인) |
+| 12:42 | `f00aa65` | **NPU IP 패키징 완료** — PLAN.md에 NPU 파트 완료 기록, `npu_ip_v1_0` 패키지 생성 |
+| 12:54 | `0f3c3a4` | **VGA IP 완성** — `vga_axi.v` 작성, `tb_vga.v` 갱신, 16×16 폰트 전환 전면 적용, .gitignore 추가, XSim `PASS: tb_vga completed` 확인, 보드 테스트 정상 |
+| 12:58 | `c12b318` | **Merge** — NPU 파트(원격 브랜치) merge |
+| 14:20 | `f386d2b` | **PLAN.md 최종 정리** — NPU 파트 상세 사양 및 검증 결과 반영 |
+
+---
+
+**현재 VGA 관련 파일 상태 (2026-06-29 12:54 기준):**
+- `training/gen_font_mem.py`: 16×16 ASCII font mem 생성
+- `font_rom.mem`: 2048 lines, 4 hex digits/line
+- `font_rom.v`: 11-bit addr, 16-bit data, 2048-depth ROM
+- `vga_ctrl.v`: 640×480 @60Hz, 40×30 text, 16×16 font render, 28×28 preview
+- `vga_axi.v`: AXI4-Lite 래퍼, CHAR_ADDR 0~1199, CANVAS_WR_*, FG/BG_COLOR
+- `vga_test_top.v`: CONFIRMING 화면 standalone VGA test top
+- `tb_font_rom.v`, `tb_vga.v`: 16×16 기준 XSim 검증 완료
 
 ---
 
