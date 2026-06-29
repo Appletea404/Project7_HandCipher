@@ -2,9 +2,25 @@
 .DS_Store
 Thumbs.db
 
+# Vivado 저널/로그
+*.jou
+*.backup.jou
+*.backup.log
+vivado.log
+xvlog.log
+xelab.log
+xelab.pb
+xsim.log
+check_vga_synth.tcl
+
 # 시뮬레이션 출력
 xsim.dir/
 xvlog.pb
+*.vcd
+*.wdb
+
+# 합성/구현 리포트
+*.rpt
 
 # Claude Code 내부 파일
 .claude/

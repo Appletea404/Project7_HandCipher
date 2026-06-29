@@ -1,7 +1,0 @@
-INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/appletea/workspace_onedevice_2/Project_7_HandCipher/Vivado/IP_TEST/IP_TEST.srcs/sources_1/imports/tft_lcd_sv.sv" into library work
-INFO: [VRFC 10-311] analyzing module spi
-INFO: [VRFC 10-311] analyzing module tft_sv
-INFO: [VRFC 10-311] analyzing module lcd_bram
-INFO: [VRFC 10-311] analyzing module xpt2046
-INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/appletea/workspace_onedevice_2/Project_7_HandCipher/Vivado/IP_TEST/IP_TEST.srcs/sources_1/imports/test_top.v" into library work
-INFO: [VRFC 10-311] analyzing module tft_lcd_top_HY

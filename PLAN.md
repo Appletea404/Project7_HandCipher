@@ -98,9 +98,9 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
 | NPU L1 weight ROM (784×64)   | 25                 |
 | NPU L2 weight ROM (64×26)    | 1                  |
 | 캔버스 BRAM (28×28, 공유)    | 1                  |
-| VGA 문자 버퍼 (80×60)        | 3                  |
-| VGA 폰트 ROM (8×8 × 128)    | 1                  |
-| **합계**                | **47 / 100** |
+| VGA 문자 버퍼 (40×30)        | 1                  |
+| VGA 폰트 ROM (16×16 × 128)  | 2                  |
+| **합계**                | **46 / 100** |
 
 ---
 
@@ -134,7 +134,7 @@ Project_7_HandCipher/
 │   │   │       ├── draw_canvas.v          (터치 좌표 → BRAM Port A)
 │   │   │       ├── tft_axi.v              (TFT AXI4-Lite 래퍼)
 │   │   │       ├── tb_tft.v
-│   │   │       ├── font_rom.v             (✅ 완료, tb_font_rom.v로 검증)
+│   │   │       ├── font_rom.v             (✅ 16×16 폰트 ROM)
 │   │   │       ├── vga_ctrl.v             (640×480 타이밍 + 문자 렌더러) ← 다음 작업
 │   │   │       ├── vga_axi.v              (VGA AXI4-Lite 래퍼)
 │   │   │       └── tb_vga.v
@@ -162,7 +162,7 @@ Project_7_HandCipher/
     ├── training_emnist.py                 (✅ 완료 → model.pth 생성됨)
     ├── quantize_export.py                 (✅ 완료 → .mem 4개 + npu_params.vh)
     ├── test_inference.py                  (✅ 완료 → 정수 정확도 87.74%)
-    └── gen_font_mem.py                    (✅ 완료 → training/exported/font_rom.mem 생성)
+    └── gen_font_mem.py                    (✅ 16×16 font_rom.mem 생성)
 ```
 
 ---
@@ -256,7 +256,7 @@ output        done
 
 ```
 0x00: CTRL           [0]=enable, [1]=clear (전체 스페이스로 채움)
-0x04: CHAR_ADDR      [12:0] 문자 버퍼 주소 (0~4799, 80×60)
+0x04: CHAR_ADDR      [10:0] 문자 버퍼 주소 (0~1199, 40×30)
 0x08: CHAR_DATA      [7:0]  쓸 문자 ASCII
 0x0C: WR_STRB        [0]=1 쓰기 실행 (자동 클리어)
 0x10: FG_COLOR       [11:0] 전경색 RGB444
@@ -273,12 +273,14 @@ output        done
 - 프리뷰 모드 (CANVAS_MODE=1): CPU가 CANVAS_WR_ADDR/DATA/EN으로 784픽셀 전송 → 손글씨 프리뷰 표시
 - `vga_ctrl`이 두 모드를 합성해 픽셀 생성
 
-**`vga_ctrl.v` (640×480 @ 60Hz, 8×8 폰트, 80×60 문자):**
+**`vga_ctrl.v` (640×480 @ 60Hz, 16×16 폰트, 40×30 문자):**
 
-- 픽셀 클록: 100MHz ÷ 4 = 25MHz (클록 분주기 내장)
+- 픽셀 클록: 100MHz ÷ 4 = 25MHz (클록 enable 방식, 새 clock domain 생성 금지)
 - `H_TOTAL=800, V_TOTAL=525` (표준 640×480 @ 60Hz 타이밍)
-- 일반 모드: `char_buf[row*80+col]` → `font_rom[char*8+row_in]` → `pixel_on`
-  - addr = char_code × 8 + row_in_char (offset 없음, ASCII 0~127 전체 저장)
+- 일반 모드: `char_buf[row*40+col]` → `font_rom[char*16+row_in]` → `pixel_on`
+  - 16×16 폰트는 한 row가 16-bit이며, ASCII 0~127 전체 저장
+  - addr = char_code × 16 + row_in_char
+  - `gen_font_mem.py`로 16×16 `font_rom.mem` 생성 완료 (2048 lines, 4 hex digits/line)
 - 프리뷰 모드 (x: 16~239, y: 48~271): `canvas_buf[py*28+px]` → 흰/검 8×8 블록 렌더링
   - `px = (vga_x - 16) / 8` (0~27), `py = (vga_y - 48) / 8` (0~27)
   - 나머지 영역은 텍스트 그대로 유지 (인식 결과, 안내 문구)
@@ -295,18 +297,18 @@ output        done
 | === CAESAR CIPHER SYSTEM ===                   | row 0
 | MODE: ENCRYPT   SHIFT: +3                      | row 2
 |                                                |
-| +----------+   NPU Result : B                 | row 6
+| +----------+   NPU Result : B                 | row 5
 | |          |                                  |
-| | 28×28    |   Press btnC = CONFIRM           | row 10
-| | 손글씨   |   Press btnL = RETRY             | row 12
+| | 28×28    |   btnC = CONFIRM                 | row 8
+| | 손글씨   |   btnL = RETRY                   | row 10
 | | 프리뷰   |                                  |
 | | (224×224)|                                  |
-| +----------+                                  | row 33
+| +----------+                                  | row 17
 |                                                |
-| Plaintext  : APPLE                             | row 36
-| Ciphertext : DSSOH                             | row 37
+| Plaintext  : APPLE                             | row 22
+| Ciphertext : DSSOH                             | row 23
 |                                                |
-| btnC=OK  btnL=CLR  SW[4:0]=SHIFT  SW[14]=MODE | row 58
+| C=OK L=CLR SW=SHIFT MODE                       | row 29
 +------------------------------------------------+
 ```
 
@@ -597,11 +599,13 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 
 **VGA IP:**
 
-12. ~~`font_rom.v`~~ ✅ + `font_rom.mem` ✅ (training/gen_font_mem.py로 생성, tb_font_rom.v로 시뮬레이션 검증 완료)
-13. `vga_ctrl.v` (640×480 @ 60Hz, 픽셀 클럭 분주 + 문자 렌더러) ← **다음 작업**
-14. `vga_axi.v` (AXI4-Lite 래퍼)
-15. `tb_vga.v` → XSim: AXI 문자 기록 → Hsync/Vsync 주기 + 픽셀 스트림 확인
-16. **Create and Package New IP** → `vga_ip_v1_0`
+12. ~~`training/gen_font_mem.py` 수정 → 16×16 `font_rom.mem` 재생성~~ ✅
+13. ~~`font_rom.v` 수정 → 16-bit row, 2048-depth ROM (128 chars × 16 rows)~~ ✅
+14. ~~`tb_font_rom.v` 갱신 → 16×16 폰트 ROM 검증~~ ✅
+15. ~~`vga_ctrl.v` 수정 → 40×30 문자, `char*16+row`, 16-bit row 렌더러~~ ✅
+16. ~~`tb_vga.v` 갱신 → 16×16 문자 출력 + Hsync/Vsync 검증~~ ✅
+17. `vga_axi.v` (AXI4-Lite 래퍼, CHAR_ADDR 0~1199 기준) ← **다음 작업**
+18. **Create and Package New IP** → `vga_ip_v1_0`
 
 ### Phase 3 — TOP 통합 (Vivado/TOP/)
 
@@ -660,9 +664,38 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 | 화면 구성   | text_buffer.v    | display.c (printf 수준) |
 | 디버깅      | XSim 시뮬레이션  | UART printf 가능        |
 | IP 구조     | 단일 top.v       | 3× Custom IP + BD      |
-| BRAM        | 31 / 100         | 47 / 100                |
+| BRAM        | 31 / 100         | 46 / 100                |
 | Vivado 작업 | RTL only         | RTL + Block Design      |
 | Vitis 작업  | 없음             | C 코드 작성             |
+
+---
+
+## 작업 기록
+
+### 2026-06-29 기록 — 16×16 폰트 전환 완료
+
+- 기존 8×8 폰트 확대 방식은 글자가 각지고 깨져 보여서 폐기.
+- `training/gen_font_mem.py`를 16×16 ASCII 폰트 생성기로 수정.
+  - 출력: `training/exported/font_rom.mem`
+  - 형식: 2048 lines, 각 line은 16-bit row를 나타내는 4자리 hex
+  - 주소식: `addr = char_code * 16 + row_in_char`
+- Vivado용 `font_rom.mem` 복사본들을 모두 2048줄 16×16 형식으로 맞춤.
+  - `IP_TEST.srcs/sources_1/new/font_rom.mem`
+  - `IP_TEST.srcs/sources_1/imports/exported/font_rom.mem`
+  - `IP_TEST.ip_user_files/mem_init_files/font_rom.mem`
+  - `IP_TEST.sim/sim_1/behav/xsim/font_rom.mem`
+- `font_rom.v` 수정 완료.
+  - `addr[10:0]`, `data[15:0]`, `mem[0:2047]`
+- `vga_ctrl.v` 수정 완료.
+  - 640×480 @ 60Hz 유지
+  - 16×16 폰트 기준 40×30 문자 화면
+  - `font_addr = {char_code[6:0], char_y[3:0]}`
+  - `font_data[15 - char_x]`로 픽셀 선택
+  - 문자 버퍼 주소 범위: 0~1199
+- `tb_font_rom.v`, `tb_vga.v` 갱신 및 검증 완료.
+  - `tb_font_rom`: XSim run 완료
+  - `tb_vga`: `PASS: tb_vga completed`
+- 보드 테스트 결과: 16×16 폰트 출력 정상 확인.
 
 ---
 
