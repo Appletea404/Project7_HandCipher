@@ -13,7 +13,58 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
 
 ## 현재 진행 상태 (2026-06-30 기준)
 
-현재 저장소 기준으로 **Phase 1 학습 파이프라인**과 **Phase 2 IP_TEST RTL 구현/시뮬레이션 검증**은 완료 상태다.
+## 2026-06-30 TOP/Vitis Integration Status Update
+
+현재 TOP Vivado Block Design과 Vitis 연결성 검증까지 진행됐다. IP_TEST 단독 RTL 검증 이후, TOP 프로젝트에서 MicroBlaze V(RISC-V), NPU/TFT/VGA AXI Custom IP, UARTLite, local memory를 통합했고 Vitis bare-metal 애플리케이션에서 AXI 접근을 확인했다.
+
+### 완료된 통합 작업
+
+- `Vivado/TOP/HandCipher` Block Design 구성 및 XSA export 진행
+- MicroBlaze V local memory를 128KB로 확장
+  - Vitis `lscript.ld`: `lmb_bram_0 : ORIGIN = 0x0, LENGTH = 0x20000`
+  - `xparameters.h`: `XPAR_LMB_BRAM_0_BASEADDRESS 0x0`, `HIGHADDRESS 0x1ffff`
+- AXI 주소 재배치 및 Vitis platform 반영
+  - NPU: `0x0002_0000 ~ 0x0002_0FFF`
+  - VGA: `0x0002_1000 ~ 0x0002_1FFF`
+  - TFT-LCD: `0x0003_0000 ~ 0x0003_0FFF`
+  - UARTLite: `0x4060_0000 ~ 0x4060_FFFF`
+- `Vitis/HandCipher/src/helloworld.c`를 자동 연결성 테스트 앱으로 변경
+  - NPU CTRL readback 확인
+  - TFT CTRL enable 및 STATUS read 확인
+  - VGA CTRL enable, CANVAS_MODE readback, 문자 버퍼/캔버스 write smoke test 수행
+
+### 최종 UART 연결성 검증 결과
+
+```text
+HandCipher connectivity test
+NPU base=0x00020000
+VGA base=0x00021000
+TFT base=0x00030000
+NPU CTRL      read=0xAAAABBBB expected=0xAAAABBBB
+TFT CTRL      read=0x00000001 enable=1
+TFT STATUS    read=0x00000002
+VGA CTRL      read=0x00000001 enable=1
+VGA TEXTMODE  read=0x00000000
+VGA CANVAS    read=0x00000001 mode=1
+
+RESULT NPU=OK TFT=OK VGA=OK
+```
+
+판정: MicroBlaze에서 NPU/TFT/VGA AXI slave까지의 주소 매핑과 기본 레지스터 접근은 정상이다. TFT/VGA의 실제 화면 경로도 사용자가 보드에서 확인했다.
+
+### 현재 남은 주요 작업
+
+- Vitis 테스트 앱을 최종 HandCipher 앱으로 확장
+  - TFT OK/CLEAR 또는 보드 버튼 입력 처리
+  - NPU start/status/result 플로우 연결
+  - VGA UI 화면 구성 및 카이사르 암호화/복호화 버퍼 관리
+- RTL NPU 정확도 문제는 별도 보류
+  - 학습/export 데이터 자체는 정상이나, RTL NPU는 시뮬레이션에서 Python 정수 모델과 결과가 맞지 않았음
+  - 최종 데모 신뢰성을 위해 필요하면 Vitis 소프트웨어 추론 또는 RTL NPU 타이밍 수정 중 하나를 선택해야 함
+
+---
+
+현재 저장소 기준으로 **Phase 1 학습 파이프라인**, **Phase 2 IP_TEST RTL 구현/시뮬레이션 검증**, 그리고 **TOP/Vitis 기본 AXI 연결성 검증**까지 완료 상태다.
 
 - 완료:
   - EMNIST 학습/양자화/export 및 정수 정확도 검증
@@ -22,10 +73,10 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
   - `font_rom.v`, `vga_ctrl.v`, `vga_axi.v`, `tb_font_rom.v`, `tb_vga.v`, `tb_vga_axi.v`
   - `Vivado/IP_TEST/IP_TEST.xpr`에 주요 RTL/시뮬레이션 파일 등록
 - 미완료/확인 필요:
-  - `npu_ip_v1_0`, `tft_ip_v1_0`, `vga_ip_v1_0` 패키징 산출물은 현재 저장소에 없음
-  - `Vivado/TOP/`는 디렉터리만 있고 Block Design / `.xsa` 산출물 없음
-  - `Vitis/`는 `.gitignore`만 있고 `main.c`, `caesar.c`, `display.c` 등 앱 소스 없음
+  - TOP/Vitis 기본 AXI 연결성은 통과했지만 최종 HandCipher 앱 로직은 아직 테스트 앱 수준
+  - NPU RTL 결과가 Python 정수 모델과 불일치하는 문제는 보류 상태
   - TFT 터치 좌표/OK/CLEAR sticky flag의 XPT2046 bitstream 기반 시뮬레이션 보강은 남아 있음
+  - 최종 UI/카이사르 암호화/복호화 Vitis 앱 구현 및 보드 검증 필요
 
 **시스템 흐름:**
 
@@ -86,10 +137,10 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
 ┌─────────────────────────────────────────────────────┐
 │                  AXI Interconnect                    │
 │                                                     │
-│  MicroBlaze ──┬──► NPU IP      (0x43C0_0000)       │
-│  (32KB BRAM)  ├──► VGA IP      (0x43C1_0000)       │
-│               ├──► TFT-LCD IP  (0x43C2_0000)       │
-│               └──► AXI GPIO    (0x40000000)         │
+│  MicroBlaze ──┬──► NPU IP      (0x0002_0000)       │
+│  (128KB LMB)  ├──► VGA IP      (0x0002_1000)       │
+│               ├──► TFT-LCD IP  (0x0003_0000)       │
+│               └──► UARTLite    (0x4060_0000)       │
 │                    (buttons + switches)              │
 └─────────────────────────────────────────────────────┘
 
@@ -110,13 +161,13 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
 
 | 내용                          | BRAM18             |
 | ----------------------------- | ------------------ |
-| MicroBlaze 로컬 메모리 (32KB) | 16                 |
+| MicroBlaze local memory (128KB) | 64                 |
 | NPU L1 weight ROM (784×64)   | 25                 |
 | NPU L2 weight ROM (64×26)    | 1                  |
 | 캔버스 BRAM (28×28, 공유)    | 1                  |
 | VGA 문자 버퍼 (40×30)        | 1                  |
 | VGA 폰트 ROM (16×16 × 128)  | 2                  |
-| **합계**                | **46 / 100** |
+| **합계(추정)**                | **94 / 100** |
 
 ---
 
@@ -155,10 +206,10 @@ Project_7_HandCipher/
 │   │   └── IP_TEST.srcs/constrs_1/
 │   │       └── imports/Basys-3-Master.xdc
 │   │
-│   └── TOP/                               ← Vivado 프로젝트 #2 (통합 + .xsa 생성 예정)
-│       └── (현재 저장소 기준 Block Design / .xsa 미생성)
+│   └── TOP/                               ← Vivado 프로젝트 #2 (통합 + .xsa 생성)
+│       └── HandCipher/                    (✅ Block Design/XSA 생성, AXI 연결성 검증)
 │
-├── Vitis/                                ← 현재 .gitignore만 존재, C 앱 소스 미작성
+├── Vitis/                                ← platform_HandCipher + HandCipher 테스트 앱 존재
 └── training/
     ├── training_emnist.py                 (✅ 완료 → model.pth 생성됨)
     ├── quantize_export.py                 (✅ 완료 → exported/*.mem 4개 + npu_params.vh)
@@ -613,11 +664,11 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 17-1. ~~`tb_vga_axi.v` → AXI 문자쓰기/clear/canvas_mode/Hsync 검증~~ ✅
 18. **Create and Package New IP** → `vga_ip_v1_0` ⏳ 미완료
 
-### Phase 3 — TOP 통합 (Vivado/TOP/) ⏳ 미시작
+### Phase 3 — TOP 통합 (Vivado/TOP/) ✅ 기본 연결성 완료
 
 19. TOP 프로젝트 생성, IP Repository에 npu_ip / tft_ip / vga_ip 추가
 20. Block Design 생성:
-    - MicroBlaze (32KB BRAM)
+    - MicroBlaze V local memory (128KB LMB)
     - AXI Interconnect
     - npu_ip, tft_ip, vga_ip 각각 Add IP
     - AXI GPIO (버튼 + 스위치)

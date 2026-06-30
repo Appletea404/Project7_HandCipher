@@ -14,11 +14,11 @@
                 compatible = "cpus,cluster";
                 #address-cells = <0x1>;
                 #size-cells = <0x0>;
-                address-map = <0x2000 &microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr_memory 0x2000 0x2000>,
-                 <0x2000 &microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr 0x2000 0x2000>,
-                 <0x0 &HandCipher_EMNIST_NPU_0 0x0 0x1000>,
-                 <0x1000 &HandCipher_VGA_0 0x1000 0x1000>,
-                 <0x10000 &HandCipher_TFT_LCD_0 0x10000 0x1000>,
+                address-map = <0x0 &microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr_memory 0x0 0x20000>,
+                 <0x0 &microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr 0x0 0x20000>,
+                 <0x20000 &HandCipher_EMNIST_NPU_0 0x20000 0x1000>,
+                 <0x21000 &HandCipher_VGA_0 0x21000 0x1000>,
+                 <0x30000 &HandCipher_TFT_LCD_0 0x30000 0x1000>,
                  <0x40600000 &axi_uartlite_0 0x40600000 0x10000>;
                 #ranges-address-cells = <0x1>;
                 #ranges-size-cells = <0x1>;
@@ -39,7 +39,7 @@
                         d-cache-highaddr = <0x3fffffff>;
                         xlnx,ip-name = "microblaze_riscv";
                         xlnx,dcache-force-tag-lutram = <0x0>;
-                        xlnx,pc-width = <0xd>;
+                        xlnx,pc-width = <0x11>;
                         xlnx,interrupt-is-edge = <0x0>;
                         reg = <0x0>;
                         xlnx,async-interrupt = <0x1>;
@@ -85,7 +85,7 @@
                         xlnx,use-bitman-s = <0x0>;
                         bus-handle = <0x7>;
                         xlnx,icache-line-len = <0x4>;
-                        xlnx,base-vectors = <0x2000>;
+                        xlnx,base-vectors = <0x0>;
                         xlnx,ecc-use-ce-exception = <0x0>;
                         xlnx,edk-special = "microblaze_riscv";
                         xlnx,use-dcache = <0x0>;
@@ -181,36 +181,36 @@
                 #size-cells = <0x1>;
                 phandle = <0x7>;
 
-                HandCipher_EMNIST_NPU_0: HandCipher_EMNIST_NPU@0 {
+                HandCipher_EMNIST_NPU_0: HandCipher_EMNIST_NPU@20000 {
                         xlnx,rable = <0x0>;
                         compatible = "xlnx,HandCipher-EMNIST-NPU-1.0";
                         status = "okay";
                         xlnx,ip-name = "HandCipher_EMNIST_NPU";
                         xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x0 0x1000>;
+                        reg = <0x20000 0x1000>;
                         xlnx,name = "HandCipher_EMNIST_NPU_0";
                         phandle = <0x3>;
                 };
 
-                HandCipher_TFT_LCD_0: HandCipher_TFT_LCD@10000 {
+                HandCipher_TFT_LCD_0: HandCipher_TFT_LCD@30000 {
                         xlnx,rable = <0x0>;
                         compatible = "xlnx,HandCipher-TFT-LCD-1.0";
                         status = "okay";
                         xlnx,ip-name = "HandCipher_TFT_LCD";
                         xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x10000 0x1000>;
+                        reg = <0x30000 0x1000>;
                         xlnx,name = "HandCipher_TFT_LCD_0";
                         phandle = <0x5>;
                 };
 
-                HandCipher_VGA_0: HandCipher_VGA@1000 {
+                HandCipher_VGA_0: HandCipher_VGA@21000 {
                         xlnx,rable = <0x0>;
                         compatible = "xlnx,HandCipher-VGA-1.0";
                         status = "okay";
                         xlnx,ip-name = "HandCipher_VGA";
                         xlnx,font-mem-file = "font_rom.mem";
                         xlnx,edk-iptype = "PERIPHERAL";
-                        reg = <0x1000 0x1000>;
+                        reg = <0x21000 0x1000>;
                         xlnx,name = "HandCipher_VGA_0";
                         phandle = <0x4>;
                 };
@@ -244,7 +244,7 @@
                         xlnx,ecc-onoff-register = <0x0>;
                         xlnx,ecc-onoff-reset-value = <0x1>;
                         xlnx,s-axi-ctrl-protocol = "AXI4LITE";
-                        xlnx,mask = <0x202000>;
+                        xlnx,mask = <0x220000>;
                         xlnx,mask1 = <0x800000>;
                         xlnx,rable = <0x0>;
                         xlnx,mask2 = <0x800000>;
@@ -253,7 +253,7 @@
                         xlnx,arbitration = <0x0>;
                         xlnx,num-lmb = <0x1>;
                         xlnx,mask4 = <0x800000>;
-                        reg = <0x2000 0x2000>;
+                        reg = <0x0 0x20000>;
                         xlnx,s-axi-ctrl-addr-width = <0x20>;
                         xlnx,mask5 = <0x800000>;
                         xlnx,ecc-status-registers = <0x0>;
@@ -281,7 +281,7 @@
                         xlnx,ecc-onoff-register = <0x0>;
                         xlnx,ecc-onoff-reset-value = <0x1>;
                         xlnx,s-axi-ctrl-protocol = "AXI4LITE";
-                        xlnx,mask = <0x2000>;
+                        xlnx,mask = <0x0>;
                         xlnx,mask1 = <0x800000>;
                         xlnx,rable = <0x0>;
                         xlnx,mask2 = <0x800000>;
@@ -290,7 +290,7 @@
                         xlnx,arbitration = <0x0>;
                         xlnx,num-lmb = <0x1>;
                         xlnx,mask4 = <0x800000>;
-                        reg = <0x2000 0x2000>;
+                        reg = <0x0 0x20000>;
                         xlnx,s-axi-ctrl-addr-width = <0x20>;
                         xlnx,mask5 = <0x800000>;
                         xlnx,ecc-status-registers = <0x0>;
@@ -311,12 +311,12 @@
                 };
         };
 
-        microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr_memory: memory@2000 {
+        microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr_memory: memory@0 {
                 compatible = "xlnx,lmb-bram-if-cntlr-4.0";
                 xlnx,ip-name = "lmb_bram_if_cntlr";
                 device_type = "memory";
                 memory_type = "memory";
-                reg = <0x2000 0x2000>;
+                reg = <0x0 0x20000>;
                 phandle = <0x1>;
         };
 
@@ -335,12 +335,12 @@
                 clk_cpu_0 = "/clocks/clk_cpu@0";
                 clk_bus_0 = "/clocks/clk_bus_0@1";
                 amba_pl = "/amba_pl";
-                HandCipher_EMNIST_NPU_0 = "/amba_pl/HandCipher_EMNIST_NPU@0";
-                HandCipher_TFT_LCD_0 = "/amba_pl/HandCipher_TFT_LCD@10000";
-                HandCipher_VGA_0 = "/amba_pl/HandCipher_VGA@1000";
+                HandCipher_EMNIST_NPU_0 = "/amba_pl/HandCipher_EMNIST_NPU@20000";
+                HandCipher_TFT_LCD_0 = "/amba_pl/HandCipher_TFT_LCD@30000";
+                HandCipher_VGA_0 = "/amba_pl/HandCipher_VGA@21000";
                 axi_uartlite_0 = "/amba_pl/serial@40600000";
                 microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr = "/amba_pl/lmb_bram_if_cntlr@0";
                 microblaze_riscv_0_local_memory_ilmb_bram_if_cntlr = "/amba_pl/lmb_bram_if_cntlr@1";
-                microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr_memory = "/memory@2000";
+                microblaze_riscv_0_local_memory_dlmb_bram_if_cntlr_memory = "/memory@0";
         };
 };

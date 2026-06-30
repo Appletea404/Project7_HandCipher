@@ -1,7 +1,7 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x4D303D785FBD3D63",
+      "boundary_crc": "0x829F7D04AB059DCC",
       "device": "xc7a35tcpg236-1",
       "gen_directory": "../../../../HandCipher.gen/sources_1/bd/HandCipher",
       "name": "HandCipher",
@@ -13,6 +13,13 @@
     "design_tree": {
       "proc_sys_reset_0": "",
       "clk_wiz": "",
+      "mdm_1": "",
+      "HandCipher_EMNIST_NPU_0": "",
+      "axi_smc": "",
+      "HandCipher_TFT_LCD_0": "",
+      "HandCipher_VGA_0": "",
+      "axi_uartlite_0": "",
+      "blk_mem_gen_0": "",
       "microblaze_riscv_0": "",
       "microblaze_riscv_0_local_memory": {
         "dlmb_v10": "",
@@ -20,14 +27,7 @@
         "dlmb_bram_if_cntlr": "",
         "ilmb_bram_if_cntlr": "",
         "lmb_bram": ""
-      },
-      "mdm_1": "",
-      "HandCipher_EMNIST_NPU_0": "",
-      "axi_smc": "",
-      "HandCipher_TFT_LCD_0": "",
-      "HandCipher_VGA_0": "",
-      "axi_uartlite_0": "",
-      "blk_mem_gen_0": ""
+      }
     },
     "interface_ports": {
       "usb_uart": {
@@ -92,6 +92,62 @@
       },
       "DOUT_0": {
         "direction": "I"
+      },
+      "vgaRed_0": {
+        "direction": "O",
+        "left": "3",
+        "right": "0"
+      },
+      "vgaGreen_0": {
+        "direction": "O",
+        "left": "3",
+        "right": "0"
+      },
+      "vgaBlue_0": {
+        "direction": "O",
+        "left": "3",
+        "right": "0"
+      },
+      "Hsync_0": {
+        "direction": "O"
+      },
+      "Vsync_0": {
+        "direction": "O"
+      },
+      "tft_sck_0": {
+        "direction": "O"
+      },
+      "tft_sdi_0": {
+        "direction": "O"
+      },
+      "tft_dc_0": {
+        "direction": "O"
+      },
+      "tft_reset_0": {
+        "type": "rst",
+        "direction": "O",
+        "parameters": {
+          "INSERT_VIP": {
+            "value": "0",
+            "value_src": "default"
+          },
+          "POLARITY": {
+            "value": "ACTIVE_LOW",
+            "value_src": "default"
+          }
+        }
+      },
+      "tft_cs_0": {
+        "direction": "O"
+      },
+      "DCLK_0": {
+        "direction": "O"
+      },
+      "DIN_0": {
+        "direction": "O"
+      },
+      "CS_N_0": {
+        "direction": "O"
       }
     },
     "components": {
@@ -128,246 +184,6 @@
           },
           "USE_BOARD_FLOW": {
             "value": "true"
-          }
-        }
-      },
-      "microblaze_riscv_0": {
-        "vlnv": "xilinx.com:ip:microblaze_riscv:1.0",
-        "ip_revision": "3",
-        "xci_name": "HandCipher_microblaze_riscv_0_0",
-        "xci_path": "ip/HandCipher_microblaze_riscv_0_0/HandCipher_microblaze_riscv_0_0.xci",
-        "inst_hier_path": "microblaze_riscv_0",
-        "parameters": {
-          "C_DEBUG_ENABLED": {
-            "value": "1"
-          },
-          "C_D_AXI": {
-            "value": "1"
-          },
-          "C_D_LMB": {
-            "value": "1"
-          },
-          "C_I_LMB": {
-            "value": "1"
-          }
-        },
-        "interface_ports": {
-          "DLMB": {
-            "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
-            "mode": "Master",
-            "address_space_ref": "Data",
-            "base_address": {
-              "minimum": "0x00000000",
-              "maximum": "0xFFFFFFFF",
-              "width": "32"
-            }
-          },
-          "ILMB": {
-            "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
-            "mode": "Master",
-            "address_space_ref": "Instruction",
-            "base_address": {
-              "minimum": "0x00000000",
-              "maximum": "0xFFFFFFFF",
-              "width": "32"
-            }
-          },
-          "M_AXI_DP": {
-            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
-            "mode": "Master",
-            "address_space_ref": "Data",
-            "base_address": {
-              "minimum": "0x00000000",
-              "maximum": "0xFFFFFFFF",
-              "width": "32"
-            }
-          }
-        },
-        "addressing": {
-          "address_spaces": {
-            "Data": {
-              "range": "4G",
-              "width": "32"
-            },
-            "Instruction": {
-              "range": "4G",
-              "width": "32"
-            }
-          }
-        },
-        "hdl_attributes": {
-          "BMM_INFO_PROCESSOR": {
-            "value": "riscv > HandCipher microblaze_riscv_0_local_memory/dlmb_bram_if_cntlr",
-            "value_src": "default"
-          },
-          "KEEP_HIERARCHY": {
-            "value": "yes",
-            "value_src": "default"
-          }
-        }
-      },
-      "microblaze_riscv_0_local_memory": {
-        "interface_ports": {
-          "DLMB": {
-            "mode": "MirroredMaster",
-            "vlnv_bus_definition": "xilinx.com:interface:lmb:1.0",
-            "vlnv": "xilinx.com:interface:lmb_rtl:1.0"
-          },
-          "ILMB": {
-            "mode": "MirroredMaster",
-            "vlnv_bus_definition": "xilinx.com:interface:lmb:1.0",
-            "vlnv": "xilinx.com:interface:lmb_rtl:1.0"
-          }
-        },
-        "ports": {
-          "LMB_Clk": {
-            "type": "clk",
-            "direction": "I"
-          },
-          "SYS_Rst": {
-            "type": "rst",
-            "direction": "I"
-          }
-        },
-        "components": {
-          "dlmb_v10": {
-            "vlnv": "xilinx.com:ip:lmb_v10:3.0",
-            "ip_revision": "14",
-            "xci_name": "HandCipher_dlmb_v10_0",
-            "xci_path": "ip/HandCipher_dlmb_v10_0/HandCipher_dlmb_v10_0.xci",
-            "inst_hier_path": "microblaze_riscv_0_local_memory/dlmb_v10",
-            "interface_ports": {
-              "LMB_M": {
-                "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
-                "mode": "MirroredMaster",
-                "bridges": [
-                  "LMB_Sl_0"
-                ]
-              }
-            }
-          },
-          "ilmb_v10": {
-            "vlnv": "xilinx.com:ip:lmb_v10:3.0",
-            "ip_revision": "14",
-            "xci_name": "HandCipher_ilmb_v10_0",
-            "xci_path": "ip/HandCipher_ilmb_v10_0/HandCipher_ilmb_v10_0.xci",
-            "inst_hier_path": "microblaze_riscv_0_local_memory/ilmb_v10",
-            "interface_ports": {
-              "LMB_M": {
-                "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
-                "mode": "MirroredMaster",
-                "bridges": [
-                  "LMB_Sl_0"
-                ]
-              }
-            }
-          },
-          "dlmb_bram_if_cntlr": {
-            "vlnv": "xilinx.com:ip:lmb_bram_if_cntlr:4.0",
-            "ip_revision": "25",
-            "xci_name": "HandCipher_dlmb_bram_if_cntlr_0",
-            "xci_path": "ip/HandCipher_dlmb_bram_if_cntlr_0/HandCipher_dlmb_bram_if_cntlr_0.xci",
-            "inst_hier_path": "microblaze_riscv_0_local_memory/dlmb_bram_if_cntlr",
-            "parameters": {
-              "C_ECC": {
-                "value": "0"
-              }
-            },
-            "hdl_attributes": {
-              "BMM_INFO_ADDRESS_SPACE": {
-                "value": "byte  0x00002000 32 > HandCipher microblaze_riscv_0_local_memory/lmb_bram",
-                "value_src": "default"
-              },
-              "KEEP_HIERARCHY": {
-                "value": "yes",
-                "value_src": "default"
-              }
-            }
-          },
-          "ilmb_bram_if_cntlr": {
-            "vlnv": "xilinx.com:ip:lmb_bram_if_cntlr:4.0",
-            "ip_revision": "25",
-            "xci_name": "HandCipher_ilmb_bram_if_cntlr_0",
-            "xci_path": "ip/HandCipher_ilmb_bram_if_cntlr_0/HandCipher_ilmb_bram_if_cntlr_0.xci",
-            "inst_hier_path": "microblaze_riscv_0_local_memory/ilmb_bram_if_cntlr",
-            "parameters": {
-              "C_ECC": {
-                "value": "0"
-              }
-            }
-          },
-          "lmb_bram": {
-            "vlnv": "xilinx.com:ip:blk_mem_gen:8.4",
-            "ip_revision": "9",
-            "xci_name": "HandCipher_lmb_bram_0",
-            "xci_path": "ip/HandCipher_lmb_bram_0/HandCipher_lmb_bram_0.xci",
-            "inst_hier_path": "microblaze_riscv_0_local_memory/lmb_bram",
-            "parameters": {
-              "Memory_Type": {
-                "value": "True_Dual_Port_RAM"
-              },
-              "use_bram_block": {
-                "value": "BRAM_Controller"
-              }
-            }
-          }
-        },
-        "interface_nets": {
-          "microblaze_riscv_0_dlmb": {
-            "interface_ports": [
-              "dlmb_v10/LMB_M",
-              "DLMB"
-            ]
-          },
-          "microblaze_riscv_0_dlmb_bus": {
-            "interface_ports": [
-              "dlmb_v10/LMB_Sl_0",
-              "dlmb_bram_if_cntlr/SLMB"
-            ]
-          },
-          "microblaze_riscv_0_dlmb_cntlr": {
-            "interface_ports": [
-              "dlmb_bram_if_cntlr/BRAM_PORT",
-              "lmb_bram/BRAM_PORTA"
-            ]
-          },
-          "microblaze_riscv_0_ilmb": {
-            "interface_ports": [
-              "ilmb_v10/LMB_M",
-              "ILMB"
-            ]
-          },
-          "microblaze_riscv_0_ilmb_bus": {
-            "interface_ports": [
-              "ilmb_v10/LMB_Sl_0",
-              "ilmb_bram_if_cntlr/SLMB"
-            ]
-          },
-          "microblaze_riscv_0_ilmb_cntlr": {
-            "interface_ports": [
-              "ilmb_bram_if_cntlr/BRAM_PORT",
-              "lmb_bram/BRAM_PORTB"
-            ]
-          }
-        },
-        "nets": {
-          "SYS_Rst_1": {
-            "ports": [
-              "SYS_Rst",
-              "dlmb_v10/SYS_Rst",
-              "dlmb_bram_if_cntlr/LMB_Rst",
-              "ilmb_v10/SYS_Rst",
-              "ilmb_bram_if_cntlr/LMB_Rst"
-            ]
-          },
-          "microblaze_riscv_0_Clk": {
-            "ports": [
-              "LMB_Clk",
-              "dlmb_v10/LMB_Clk",
-              "dlmb_bram_if_cntlr/LMB_Clk",
-              "ilmb_v10/LMB_Clk",
-              "ilmb_bram_if_cntlr/LMB_Clk"
-            ]
           }
         }
       },
@@ -591,6 +407,246 @@
             "value": "Stand_Alone"
           }
         }
+      },
+      "microblaze_riscv_0": {
+        "vlnv": "xilinx.com:ip:microblaze_riscv:1.0",
+        "ip_revision": "3",
+        "xci_name": "HandCipher_microblaze_riscv_0_1",
+        "xci_path": "ip/HandCipher_microblaze_riscv_0_1/HandCipher_microblaze_riscv_0_1.xci",
+        "inst_hier_path": "microblaze_riscv_0",
+        "parameters": {
+          "C_DEBUG_ENABLED": {
+            "value": "1"
+          },
+          "C_D_AXI": {
+            "value": "1"
+          },
+          "C_D_LMB": {
+            "value": "1"
+          },
+          "C_I_LMB": {
+            "value": "1"
+          }
+        },
+        "interface_ports": {
+          "DLMB": {
+            "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
+            "mode": "Master",
+            "address_space_ref": "Data",
+            "base_address": {
+              "minimum": "0x00000000",
+              "maximum": "0xFFFFFFFF",
+              "width": "32"
+            }
+          },
+          "ILMB": {
+            "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
+            "mode": "Master",
+            "address_space_ref": "Instruction",
+            "base_address": {
+              "minimum": "0x00000000",
+              "maximum": "0xFFFFFFFF",
+              "width": "32"
+            }
+          },
+          "M_AXI_DP": {
+            "vlnv": "xilinx.com:interface:aximm_rtl:1.0",
+            "mode": "Master",
+            "address_space_ref": "Data",
+            "base_address": {
+              "minimum": "0x00000000",
+              "maximum": "0xFFFFFFFF",
+              "width": "32"
+            }
+          }
+        },
+        "addressing": {
+          "address_spaces": {
+            "Data": {
+              "range": "4G",
+              "width": "32"
+            },
+            "Instruction": {
+              "range": "4G",
+              "width": "32"
+            }
+          }
+        },
+        "hdl_attributes": {
+          "BMM_INFO_PROCESSOR": {
+            "value": "riscv > HandCipher microblaze_riscv_0_local_memory/dlmb_bram_if_cntlr",
+            "value_src": "default"
+          },
+          "KEEP_HIERARCHY": {
+            "value": "yes",
+            "value_src": "default"
+          }
+        }
+      },
+      "microblaze_riscv_0_local_memory": {
+        "interface_ports": {
+          "DLMB": {
+            "mode": "MirroredMaster",
+            "vlnv_bus_definition": "xilinx.com:interface:lmb:1.0",
+            "vlnv": "xilinx.com:interface:lmb_rtl:1.0"
+          },
+          "ILMB": {
+            "mode": "MirroredMaster",
+            "vlnv_bus_definition": "xilinx.com:interface:lmb:1.0",
+            "vlnv": "xilinx.com:interface:lmb_rtl:1.0"
+          }
+        },
+        "ports": {
+          "LMB_Clk": {
+            "type": "clk",
+            "direction": "I"
+          },
+          "SYS_Rst": {
+            "type": "rst",
+            "direction": "I"
+          }
+        },
+        "components": {
+          "dlmb_v10": {
+            "vlnv": "xilinx.com:ip:lmb_v10:3.0",
+            "ip_revision": "14",
+            "xci_name": "HandCipher_dlmb_v10_1",
+            "xci_path": "ip/HandCipher_dlmb_v10_1/HandCipher_dlmb_v10_1.xci",
+            "inst_hier_path": "microblaze_riscv_0_local_memory/dlmb_v10",
+            "interface_ports": {
+              "LMB_M": {
+                "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
+                "mode": "MirroredMaster",
+                "bridges": [
+                  "LMB_Sl_0"
+                ]
+              }
+            }
+          },
+          "ilmb_v10": {
+            "vlnv": "xilinx.com:ip:lmb_v10:3.0",
+            "ip_revision": "14",
+            "xci_name": "HandCipher_ilmb_v10_1",
+            "xci_path": "ip/HandCipher_ilmb_v10_1/HandCipher_ilmb_v10_1.xci",
+            "inst_hier_path": "microblaze_riscv_0_local_memory/ilmb_v10",
+            "interface_ports": {
+              "LMB_M": {
+                "vlnv": "xilinx.com:interface:lmb_rtl:1.0",
+                "mode": "MirroredMaster",
+                "bridges": [
+                  "LMB_Sl_0"
+                ]
+              }
+            }
+          },
+          "dlmb_bram_if_cntlr": {
+            "vlnv": "xilinx.com:ip:lmb_bram_if_cntlr:4.0",
+            "ip_revision": "25",
+            "xci_name": "HandCipher_dlmb_bram_if_cntlr_1",
+            "xci_path": "ip/HandCipher_dlmb_bram_if_cntlr_1/HandCipher_dlmb_bram_if_cntlr_1.xci",
+            "inst_hier_path": "microblaze_riscv_0_local_memory/dlmb_bram_if_cntlr",
+            "parameters": {
+              "C_ECC": {
+                "value": "0"
+              }
+            },
+            "hdl_attributes": {
+              "BMM_INFO_ADDRESS_SPACE": {
+                "value": "byte  0x00000000 32 > HandCipher microblaze_riscv_0_local_memory/lmb_bram",
+                "value_src": "default"
+              },
+              "KEEP_HIERARCHY": {
+                "value": "yes",
+                "value_src": "default"
+              }
+            }
+          },
+          "ilmb_bram_if_cntlr": {
+            "vlnv": "xilinx.com:ip:lmb_bram_if_cntlr:4.0",
+            "ip_revision": "25",
+            "xci_name": "HandCipher_ilmb_bram_if_cntlr_1",
+            "xci_path": "ip/HandCipher_ilmb_bram_if_cntlr_1/HandCipher_ilmb_bram_if_cntlr_1.xci",
+            "inst_hier_path": "microblaze_riscv_0_local_memory/ilmb_bram_if_cntlr",
+            "parameters": {
+              "C_ECC": {
+                "value": "0"
+              }
+            }
+          },
+          "lmb_bram": {
+            "vlnv": "xilinx.com:ip:blk_mem_gen:8.4",
+            "ip_revision": "9",
+            "xci_name": "HandCipher_lmb_bram_1",
+            "xci_path": "ip/HandCipher_lmb_bram_1/HandCipher_lmb_bram_1.xci",
+            "inst_hier_path": "microblaze_riscv_0_local_memory/lmb_bram",
+            "parameters": {
+              "Memory_Type": {
+                "value": "True_Dual_Port_RAM"
+              },
+              "use_bram_block": {
+                "value": "BRAM_Controller"
+              }
+            }
+          }
+        },
+        "interface_nets": {
+          "microblaze_riscv_0_dlmb": {
+            "interface_ports": [
+              "dlmb_v10/LMB_M",
+              "DLMB"
+            ]
+          },
+          "microblaze_riscv_0_dlmb_bus": {
+            "interface_ports": [
+              "dlmb_v10/LMB_Sl_0",
+              "dlmb_bram_if_cntlr/SLMB"
+            ]
+          },
+          "microblaze_riscv_0_dlmb_cntlr": {
+            "interface_ports": [
+              "dlmb_bram_if_cntlr/BRAM_PORT",
+              "lmb_bram/BRAM_PORTA"
+            ]
+          },
+          "microblaze_riscv_0_ilmb": {
+            "interface_ports": [
+              "ilmb_v10/LMB_M",
+              "ILMB"
+            ]
+          },
+          "microblaze_riscv_0_ilmb_bus": {
+            "interface_ports": [
+              "ilmb_v10/LMB_Sl_0",
+              "ilmb_bram_if_cntlr/SLMB"
+            ]
+          },
+          "microblaze_riscv_0_ilmb_cntlr": {
+            "interface_ports": [
+              "ilmb_bram_if_cntlr/BRAM_PORT",
+              "lmb_bram/BRAM_PORTB"
+            ]
+          }
+        },
+        "nets": {
+          "SYS_Rst_1": {
+            "ports": [
+              "SYS_Rst",
+              "dlmb_v10/SYS_Rst",
+              "dlmb_bram_if_cntlr/LMB_Rst",
+              "ilmb_v10/SYS_Rst",
+              "ilmb_bram_if_cntlr/LMB_Rst"
+            ]
+          },
+          "microblaze_riscv_0_Clk": {
+            "ports": [
+              "LMB_Clk",
+              "dlmb_v10/LMB_Clk",
+              "dlmb_bram_if_cntlr/LMB_Clk",
+              "ilmb_v10/LMB_Clk",
+              "ilmb_bram_if_cntlr/LMB_Clk"
+            ]
+          }
+        }
       }
     },
     "interface_nets": {
@@ -668,6 +724,24 @@
           "blk_mem_gen_0/enb"
         ]
       },
+      "HandCipher_TFT_LCD_0_CS_N": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/CS_N",
+          "CS_N_0"
+        ]
+      },
+      "HandCipher_TFT_LCD_0_DCLK": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/DCLK",
+          "DCLK_0"
+        ]
+      },
+      "HandCipher_TFT_LCD_0_DIN": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/DIN",
+          "DIN_0"
+        ]
+      },
       "HandCipher_TFT_LCD_0_canvas_addra": {
         "ports": [
           "HandCipher_TFT_LCD_0/canvas_addra",
@@ -692,6 +766,66 @@
           "blk_mem_gen_0/wea"
         ]
       },
+      "HandCipher_TFT_LCD_0_tft_cs": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/tft_cs",
+          "tft_cs_0"
+        ]
+      },
+      "HandCipher_TFT_LCD_0_tft_dc": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/tft_dc",
+          "tft_dc_0"
+        ]
+      },
+      "HandCipher_TFT_LCD_0_tft_reset": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/tft_reset",
+          "tft_reset_0"
+        ]
+      },
+      "HandCipher_TFT_LCD_0_tft_sck": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/tft_sck",
+          "tft_sck_0"
+        ]
+      },
+      "HandCipher_TFT_LCD_0_tft_sdi": {
+        "ports": [
+          "HandCipher_TFT_LCD_0/tft_sdi",
+          "tft_sdi_0"
+        ]
+      },
+      "HandCipher_VGA_0_Hsync": {
+        "ports": [
+          "HandCipher_VGA_0/Hsync",
+          "Hsync_0"
+        ]
+      },
+      "HandCipher_VGA_0_Vsync": {
+        "ports": [
+          "HandCipher_VGA_0/Vsync",
+          "Vsync_0"
+        ]
+      },
+      "HandCipher_VGA_0_vgaBlue": {
+        "ports": [
+          "HandCipher_VGA_0/vgaBlue",
+          "vgaBlue_0"
+        ]
+      },
+      "HandCipher_VGA_0_vgaGreen": {
+        "ports": [
+          "HandCipher_VGA_0/vgaGreen",
+          "vgaGreen_0"
+        ]
+      },
+      "HandCipher_VGA_0_vgaRed": {
+        "ports": [
+          "HandCipher_VGA_0/vgaRed",
+          "vgaRed_0"
+        ]
+      },
       "PenIrq_n_0_1": {
         "ports": [
           "PenIrq_n_0",
@@ -714,15 +848,15 @@
         "ports": [
           "clk_wiz/clk_out1",
           "proc_sys_reset_0/slowest_sync_clk",
-          "microblaze_riscv_0/Clk",
-          "microblaze_riscv_0_local_memory/LMB_Clk",
           "axi_smc/aclk",
           "HandCipher_EMNIST_NPU_0/S_AXI_ACLK",
           "HandCipher_TFT_LCD_0/S_AXI_ACLK",
           "HandCipher_VGA_0/S_AXI_ACLK",
           "axi_uartlite_0/s_axi_aclk",
           "blk_mem_gen_0/clka",
-          "blk_mem_gen_0/clkb"
+          "blk_mem_gen_0/clkb",
+          "microblaze_riscv_0/Clk",
+          "microblaze_riscv_0_local_memory/LMB_Clk"
         ]
       },
       "proc_sys_reset_0_bus_struct_reset": {
@@ -774,17 +908,17 @@
             "segments": {
               "SEG_HandCipher_EMNIST_NPU_0_reg0": {
                 "address_block": "/HandCipher_EMNIST_NPU_0/S_AXI/reg0",
-                "offset": "0x00000000",
+                "offset": "0x00020000",
                 "range": "4K"
               },
               "SEG_HandCipher_TFT_LCD_0_reg0": {
                 "address_block": "/HandCipher_TFT_LCD_0/S_AXI/reg0",
-                "offset": "0x00010000",
+                "offset": "0x00030000",
                 "range": "4K"
               },
               "SEG_HandCipher_VGA_0_reg0": {
                 "address_block": "/HandCipher_VGA_0/S_AXI/reg0",
-                "offset": "0x00001000",
+                "offset": "0x00021000",
                 "range": "4K"
               },
               "SEG_axi_uartlite_0_Reg": {
@@ -794,8 +928,8 @@
               },
               "SEG_dlmb_bram_if_cntlr_Mem": {
                 "address_block": "/microblaze_riscv_0_local_memory/dlmb_bram_if_cntlr/SLMB/Mem",
-                "offset": "0x00002000",
-                "range": "8K",
+                "offset": "0x00000000",
+                "range": "128K",
                 "offset_high_param": "C_HIGHADDR"
               }
             }
@@ -804,8 +938,8 @@
             "segments": {
               "SEG_ilmb_bram_if_cntlr_Mem": {
                 "address_block": "/microblaze_riscv_0_local_memory/ilmb_bram_if_cntlr/SLMB/Mem",
-                "offset": "0x00002000",
-                "range": "8K",
+                "offset": "0x00000000",
+                "range": "128K",
                 "offset_high_param": "C_HIGHADDR"
               }
             }

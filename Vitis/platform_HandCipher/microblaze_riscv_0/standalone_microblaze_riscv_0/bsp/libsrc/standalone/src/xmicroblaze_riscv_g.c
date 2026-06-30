@@ -4,7 +4,7 @@ XMicroblaze_RISCV_Config XMicroblaze_RISCV_ConfigTable[] __attribute__ ((section
 	{
 		0x5f5e100,  /* timebase-frequency */
 		0x5f5e100,  /* xlnx,freq */
-		0x2000,  /* xlnx,base-vectors */
+		0x0,  /* xlnx,base-vectors */
 		0x0,  /* xlnx,use-mmu */
 		0x0,  /* xlnx,use-dcache */
 		0x0,  /* xlnx,use-icache */

@@ -19,7 +19,7 @@
 			d-cache-highaddr = <0x3fffffff>;
 			xlnx,ip-name = "microblaze_riscv";
 			xlnx,dcache-force-tag-lutram = <0>;
-			xlnx,pc-width = <13>;
+			xlnx,pc-width = <17>;
 			xlnx,interrupt-is-edge = <0>;
 			reg = <0x0>;
 			xlnx,async-interrupt = <1>;
@@ -65,7 +65,7 @@
 			xlnx,use-bitman-s = <0>;
 			bus-handle = <&amba_pl>;
 			xlnx,icache-line-len = <4>;
-			xlnx,base-vectors = <0x2000>;
+			xlnx,base-vectors = <0x0>;
 			xlnx,ecc-use-ce-exception = <0>;
 			xlnx,edk-special = "microblaze_riscv";
 			xlnx,use-dcache = <0>;
@@ -151,32 +151,32 @@
 		compatible = "simple-bus";
 		#address-cells = <1>;
 		#size-cells = <1>;
-		HandCipher_EMNIST_NPU_0: HandCipher_EMNIST_NPU@0 {
+		HandCipher_EMNIST_NPU_0: HandCipher_EMNIST_NPU@20000 {
 			xlnx,rable = <0>;
 			compatible = "xlnx,HandCipher-EMNIST-NPU-1.0";
 			status = "okay";
 			xlnx,ip-name = "HandCipher_EMNIST_NPU";
 			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x00000000 0x1000>;
+			reg = <0x00020000 0x1000>;
 			xlnx,name = "HandCipher_EMNIST_NPU_0";
 		};
-		HandCipher_TFT_LCD_0: HandCipher_TFT_LCD@10000 {
+		HandCipher_TFT_LCD_0: HandCipher_TFT_LCD@30000 {
 			xlnx,rable = <0>;
 			compatible = "xlnx,HandCipher-TFT-LCD-1.0";
 			status = "okay";
 			xlnx,ip-name = "HandCipher_TFT_LCD";
 			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x00010000 0x1000>;
+			reg = <0x00030000 0x1000>;
 			xlnx,name = "HandCipher_TFT_LCD_0";
 		};
-		HandCipher_VGA_0: HandCipher_VGA@1000 {
+		HandCipher_VGA_0: HandCipher_VGA@21000 {
 			xlnx,rable = <0>;
 			compatible = "xlnx,HandCipher-VGA-1.0";
 			status = "okay";
 			xlnx,ip-name = "HandCipher_VGA";
 			xlnx,font-mem-file = "font_rom.mem";
 			xlnx,edk-iptype = "PERIPHERAL";
-			reg = <0x00001000 0x1000>;
+			reg = <0x00021000 0x1000>;
 			xlnx,name = "HandCipher_VGA_0";
 		};
 		axi_uartlite_0: serial@40600000 {
@@ -206,7 +206,7 @@
 			xlnx,ecc-onoff-register = <0>;
 			xlnx,ecc-onoff-reset-value = <1>;
 			xlnx,s-axi-ctrl-protocol = "AXI4LITE";
-			xlnx,mask = <0x202000>;
+			xlnx,mask = <0x220000>;
 			xlnx,mask1 = <0x800000>;
 			xlnx,rable = <0>;
 			xlnx,mask2 = <0x800000>;
@@ -215,7 +215,7 @@
 			xlnx,arbitration = <0>;
 			xlnx,num-lmb = <1>;
 			xlnx,mask4 = <0x800000>;
-			reg = <0x00002000 0x2000>;
+			reg = <0x00000000 0x20000>;
 			xlnx,s-axi-ctrl-addr-width = <32>;
 			xlnx,mask5 = <0x800000>;
 			xlnx,ecc-status-registers = <0>;
@@ -241,7 +241,7 @@
 			xlnx,ecc-onoff-register = <0>;
 			xlnx,ecc-onoff-reset-value = <1>;
 			xlnx,s-axi-ctrl-protocol = "AXI4LITE";
-			xlnx,mask = <0x2000>;
+			xlnx,mask = <0x0>;
 			xlnx,mask1 = <0x800000>;
 			xlnx,rable = <0>;
 			xlnx,mask2 = <0x800000>;
@@ -250,7 +250,7 @@
 			xlnx,arbitration = <0>;
 			xlnx,num-lmb = <1>;
 			xlnx,mask4 = <0x800000>;
-			reg = <0x00002000 0x2000>;
+			reg = <0x00000000 0x20000>;
 			xlnx,s-axi-ctrl-addr-width = <32>;
 			xlnx,mask5 = <0x800000>;
 			xlnx,ecc-status-registers = <0>;

@@ -1,11 +1,11 @@
 {
   "schema": "xilinx.com:schema:json_instance:1.0",
   "ip_inst": {
-    "xci_name": "HandCipher_dlmb_v10_0",
+    "xci_name": "HandCipher_dlmb_v10_1",
     "cell_name": "microblaze_riscv_0_local_memory/dlmb_v10",
     "component_reference": "xilinx.com:ip:lmb_v10:3.0",
     "ip_revision": "14",
-    "gen_directory": "../../../../../../HandCipher.gen/sources_1/bd/HandCipher/ip/HandCipher_dlmb_v10_0",
+    "gen_directory": "../../../../../../HandCipher.gen/sources_1/bd/HandCipher/ip/HandCipher_dlmb_v10_1",
     "parameters": {
       "component_parameters": {
         "C_LMB_DWIDTH": [ { "value": "32", "value_src": "propagated", "resolve_type": "user", "format": "long", "usage": "all" } ],
@@ -13,7 +13,7 @@
         "C_LMB_PROTOCOL": [ { "value": "0", "value_src": "propagated", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "C_EXT_RESET_HIGH": [ { "value": "1", "resolve_type": "user", "format": "long", "usage": "all" } ],
         "C_LMB_NUM_SLAVES": [ { "value": "1", "resolve_type": "user", "format": "long", "usage": "all" } ],
-        "Component_Name": [ { "value": "HandCipher_dlmb_v10_0", "resolve_type": "user", "usage": "all" } ]
+        "Component_Name": [ { "value": "HandCipher_dlmb_v10_1", "resolve_type": "user", "usage": "all" } ]
       },
       "model_parameters": {
         "C_LMB_NUM_SLAVES": [ { "value": "1", "resolve_type": "generated", "format": "long", "usage": "all" } ],
@@ -39,7 +39,7 @@
         "IPCONTEXT": [ { "value": "IP_Integrator" } ],
         "IPREVISION": [ { "value": "14" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../../../HandCipher.gen/sources_1/bd/HandCipher/ip/HandCipher_dlmb_v10_0" } ],
+        "OUTPUTDIR": [ { "value": "../../../../../../HandCipher.gen/sources_1/bd/HandCipher/ip/HandCipher_dlmb_v10_1" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "../../ipshared" } ],
         "SWVERSION": [ { "value": "2024.2" } ],

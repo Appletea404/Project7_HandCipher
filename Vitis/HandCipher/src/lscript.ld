@@ -10,7 +10,7 @@ _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x800;
 
 MEMORY
 {
-	lmb_bram_0 : ORIGIN = 0x2000, LENGTH = 0x2000
+	lmb_bram_0 : ORIGIN = 0x0, LENGTH = 0x20000
 }
 
 /* Specify the default entry point to the program */
