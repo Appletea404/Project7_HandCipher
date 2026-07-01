@@ -10,7 +10,7 @@
 #define GREEN       0x0F0U
 #define RED         0xF00U
 #define YELLOW      0xFF0U
-#define GRAY        0xDDDU
+#define GRAY        0x888U
 #define DARK_BLUE   0x008U
 
 void vga_putchar(u32 base, int row, int col, char c, u32 fg, u32 bg);

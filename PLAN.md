@@ -11,7 +11,7 @@ EMNIST NPU, VGA, TFT-LCD를 각각 AXI Custom IP로 패키징해 Vivado Block De
 - **RTL (Custom IP)**: NPU 추론, VGA 신호 생성, ILI9341/XPT2046 SPI 제어
 - **C 소프트웨어 (Vitis)**: 카이사르 암호화/복호화, 화면 구성, 버튼/스위치 처리, 모드 제어
 
-## 현재 진행 상태 (2026-06-30 기준)
+## 현재 진행 상태 (2026-07-01 기준)
 
 ## 2026-06-30 TOP/Vitis Integration Status Update
 
@@ -686,22 +686,16 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 25. Application 프로젝트 생성 → caesar.c / caesar.h ✅ (완료)
 26. display.c / display.h ✅ (완료)
 27. main.c (helloworld.c) ✅ (완료, FSM 및 화면 제어 연결)
-28. 빌드 + Basys3에 Program Device ✅ (UART 제어 메뉴 추가로 GPIO 스위치 부재 우회 완료)
+28. 빌드 + Basys3에 Program Device ✅
+    - AXI GPIO (버튼/스위치) 정상 동작 확인 — btnU/btnD(Shift), btnL(CLR), SW0(Reset), SW15(Mode)
+    - 소프트웨어 NPU 추론 사용 (`USE_SOFTWARE_NPU=1`, 하드웨어 RTL NPU 정확도 문제로 우회)
+    - Vitis 워크스페이스 캐시 문제 발생 → Platform + Application 삭제 후 재생성으로 해결
 
-> [!NOTE]
-> **UART 제어 메뉴 추가**
-> TOP Block Design에 AXI GPIO가 배치되지 않아 보드의 물리적 스위치와 버튼을 읽을 수 없는 한계를 우회하기 위해, UARTLite(0x4060_0000)를 통한 **비차단식(non-blocking) 시리얼 명령어 제어**를 구현했습니다.
-> - `+` / `=` : 카이사르 시프트 값(shift) 1 증가
-> - `-` / `_` : 카이사르 시프트 값(shift) 1 감소
-> - `m` / `M` : 암호화(ENCRYPT) / 복호화(DECRYPT) 모드 토글
-> - `r` / `R` : 평문/암호문 버퍼 초기화
-> - `h` / `?` : 현재 설정 및 도움말 출력
+### Phase 5 — 하드웨어 검증 ✅ 완료
 
-### Phase 5 — 하드웨어 검증 ⏳ 미시작
-
-29. 글자 그리기 → btnC → VGA 암호화 결과 확인
-30. SW[14]=1 복호화 모드 전환 확인
-31. SW[4:0] 시프트 값 변경 실시간 반영 확인
+29. ~~글자 그리기 → OK → VGA 암호화 결과 확인~~ ✅
+30. ~~SW15 복호화 모드 전환 확인~~ ✅
+31. ~~btnU/D 시프트 값 변경 실시간 반영 확인~~ ✅
 
 ---
 
@@ -734,18 +728,47 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 
 ---
 
+## 추가 개선 계획
+
+### btnR — 마지막 문자 삭제 기능으로 변경 ✅ 완료
+
+**변경 내용:** `Vitis/HandCipher/src/handcipher.c`
+
+```c
+// ok_event에서 btnR 제거
+int ok_event = ok_pressed;
+
+// btnR: 마지막 문자 삭제 (Backspace)
+if (btnR_pressed) {
+    if (buf_len > 0) {
+        buf_len--;
+        config_changed = 1;
+    }
+}
+```
+
+> `plain_buf[buf_len] = '\0'` 불필요 — `display_drawing`이 출력 전 `plain[len] = '\0'` 처리하므로 `buf_len--`만으로 충분.
+
+**버튼 역할 최종 정리 (변경 후):**
+
+| 버튼 | 기능 |
+|------|------|
+| btnU | Shift +1 |
+| btnD | Shift -1 |
+| btnL | 캔버스 + 버퍼 전체 초기화 |
+| btnR | 버퍼 마지막 문자 1개 삭제 (Backspace) |
+| TFT OK  | 추론 결과 확정 (Commit) |
+| TFT CLR | 캔버스 지우기 |
+| SW0  | 전체 리셋 (shift=3, 버퍼 초기화) |
+| SW15 | 모드 전환 (ENCRYPT ↔ DECRYPT) |
+
+---
+
 ## 미해결 이슈
 
-### NPU IP 패키징 파일 누락 의심 (2026-06-29)
+### NPU IP 패키징 파일 누락 의심 (2026-06-29) ✅ 해결
 
-- `kwakyj91(곽영재)`가 로컬 Vivado에서 `npu_ip_v1_0` 패키징을 완료했다고 PLAN.md에 기록했으나, git 저장소에 IP 파일이 없음.
-- **원인 추정:** `Vivado/TOP/.gitignore`에 `*.xml` 규칙이 있어서 `component.xml`(IP 패키징의 핵심 파일)이 커밋되지 않았을 가능성이 높음.
-- **확인 필요:** 곽영재 로컬에 `ip_repo/npu_ip_v1_0/component.xml`이 존재하는지 확인.
-- **조치 필요 시:** `.gitignore`에서 IP repo 경로 예외 처리 후 재업로드.
-  ```
-  *.xml
-  !**/ip_repo/**/component.xml
-  ```
+- `ip_repo/npu_ip/component.xml`, `ip_repo/tft_ip/component.xml`, `ip_repo/vga_ip/component.xml` 모두 저장소에 존재 확인.
 
 ---
 
@@ -796,6 +819,17 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 | 시각 | 커밋 | 내용 |
 |------|------|------|
 | working tree | `working tree` | **현재 상태 재점검** — Phase 2 IP_TEST RTL/AXI 테스트 완료 상태 확인, IP 패키징/TOP/Vitis 미구현 상태 PLAN.md에 반영 |
+
+### 2026-07-01 (수)
+
+| 시각 | 커밋 | 내용 |
+|------|------|------|
+| — | `a7f806a` | **팀원 PR #6 merge** — 1차 완성본 (caesar.c, display.c, helloworld.c 추가) |
+| — | `5cc9107` | **2차 완성본** — UART 제거, 버튼/스위치 입력으로 전환, AXI GPIO 추가된 XSA 업데이트 |
+| — | `248a187` | **resolve-pr7 merge** — 두 브랜치 통합, BSP에 xgpio 드라이버 추가, Block Design에 axi_gpio_0 반영 |
+| — | `c0d5762` | **`.gitignore` 수정** — Vitis 빌드 산출물 패턴 추가, `.cache/` 추가 |
+| — | — | **Vitis 워크스페이스 캐시 문제 디버깅** — platform 절대경로가 팀원 PC 경로(`/home/kwakyj91/...`) 참조, Platform + Application 삭제 후 재생성으로 해결 |
+| — | — | **보드 동작 검증 완료** — btnU/D(Shift), btnL(CLR), SW0(Reset), SW15(Mode), TFT 터치 OK/CLR, VGA 출력 모두 정상 동작 확인 |
 
 ---
 

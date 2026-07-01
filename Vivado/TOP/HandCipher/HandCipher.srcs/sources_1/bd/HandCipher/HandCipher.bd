@@ -685,18 +685,18 @@
             "ports": [
               "SYS_Rst",
               "dlmb_v10/SYS_Rst",
-              "dlmb_bram_if_cntlr/LMB_Rst",
               "ilmb_v10/SYS_Rst",
-              "ilmb_bram_if_cntlr/LMB_Rst"
+              "ilmb_bram_if_cntlr/LMB_Rst",
+              "dlmb_bram_if_cntlr/LMB_Rst"
             ]
           },
           "microblaze_riscv_0_Clk": {
             "ports": [
               "LMB_Clk",
               "dlmb_v10/LMB_Clk",
-              "dlmb_bram_if_cntlr/LMB_Clk",
               "ilmb_v10/LMB_Clk",
-              "ilmb_bram_if_cntlr/LMB_Clk"
+              "ilmb_bram_if_cntlr/LMB_Clk",
+              "dlmb_bram_if_cntlr/LMB_Clk"
             ]
           }
         }
@@ -937,7 +937,6 @@
         "ports": [
           "clk_wiz/clk_out1",
           "proc_sys_reset_0/slowest_sync_clk",
-          "axi_smc/aclk",
           "HandCipher_EMNIST_NPU_0/S_AXI_ACLK",
           "HandCipher_TFT_LCD_0/S_AXI_ACLK",
           "HandCipher_VGA_0/S_AXI_ACLK",
@@ -946,7 +945,8 @@
           "blk_mem_gen_0/clkb",
           "microblaze_riscv_0/Clk",
           "microblaze_riscv_0_local_memory/LMB_Clk",
-          "axi_gpio_0/s_axi_aclk"
+          "axi_gpio_0/s_axi_aclk",
+          "axi_smc/aclk"
         ]
       },
       "proc_sys_reset_0_bus_struct_reset": {
@@ -965,11 +965,11 @@
         "ports": [
           "proc_sys_reset_0/peripheral_aresetn",
           "HandCipher_EMNIST_NPU_0/S_AXI_ARESETN",
-          "axi_smc/aresetn",
           "HandCipher_TFT_LCD_0/S_AXI_ARESETN",
           "HandCipher_VGA_0/S_AXI_ARESETN",
           "axi_uartlite_0/s_axi_aresetn",
-          "axi_gpio_0/s_axi_aresetn"
+          "axi_gpio_0/s_axi_aresetn",
+          "axi_smc/aresetn"
         ]
       },
       "reset_1": {

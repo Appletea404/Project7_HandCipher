@@ -1,41 +1,21 @@
-# Build/export outputs
-/build/
-/export/
-**/build/
-**/build_configs/
+# Ignore build output directory
+/build
+/export
 
-# CMake/Ninja generated files
-**/CMakeFiles/
-**/CMakeCache.txt
-**/cmake_install.cmake
-**/install_manifest.txt
-**/build.ninja
-**/rules.ninja
-**/compile_commands.json
-compile_commands.json
-**/.ninja_deps
-**/.ninja_log
+# Ignore object files and dependent files
+.o
+.d
 
-# Objects, libraries, and executable outputs
-*.o
-*.obj
-*.d
-*.a
-*.elf
-*.elf.size
-*.map
-*.bin
-*.pdi
-a.out
+#Ignore logs folder and log files
+/logs
+.log
 
-# Logs, locks, and IDE cache
-/logs/
-logs/
-*.log
-*.lock
-_ide/logs/
-_ide/.wsdata/
-.Xil/
-.cache/
-**/.cache/
+#Ignore lock files
+.lock
+
+.bin
+.pdi
 .vitisWorkspace.json
+
+_ide/logs
+_ide/.wsdata

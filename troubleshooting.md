@@ -361,11 +361,40 @@ T -> D
 
 따라서 모델 데이터보다는 RTL NPU 내부의 ROM/BRAM read latency 또는 MAC accumulation 타이밍 불일치 가능성이 높다.
 
+### 해결 — 소프트웨어 추론으로 우회
+
+RTL NPU 타이밍 근본 원인 수정 대신 데모 신뢰성을 우선해 MicroBlaze C 코드로 MLP를 직접 수행하는 방식으로 전환했다.
+
+**`npu_weights.h` 생성** — 학습된 가중치/바이어스를 C 배열로 임베딩:
+
+```c
+#define SHIFT_L1 10
+static const s8  weights_l1[64 * 784] = { ... };
+static const s8  weights_l2[26 * 64]  = { ... };
+static const s32 biases_l1[64]        = { ... };
+static const s32 biases_l2[26]        = { ... };
+```
+
+**`perform_software_inference()` 구현** — `handcipher.c`에서 MicroBlaze가 직접 784→64→26 MLP 연산:
+
+```c
+#define USE_SOFTWARE_NPU 1
+
+char perform_software_inference(void) {
+    // 1. TFT 캔버스에서 픽셀 읽기 (0 or 255)
+    // 2. L1: accum = bias + Σ(px × w1) >> SHIFT_L1, ReLU, clamp 0~255
+    // 3. L2: score = bias + Σ(hidden × w2)
+    // 4. argmax → 'A' + idx
+}
+```
+
+**트레이드오프:**
+- RTL NPU: 전용 병렬 하드웨어, ~157μs 추론
+- 소프트웨어 NPU: MicroBlaze 순차 연산, 속도 느림 (터치 중 추론 시 체감 지연 있음)
+
 ### 현재 상태
 
-- 최종 연결성 검증에서는 NPU AXI slave read/write 접근만 확인 완료
-- NPU 추론 정확도 문제는 별도 보류
-- 데모 신뢰성이 우선이면 Vitis software inference로 우회하거나, RTL NPU 타이밍을 별도 수정/검증해야 한다.
+RTL NPU 정확도 문제는 미해결 보류. ROM/BRAM read latency 또는 MAC accumulation 타이밍 불일치 가능성이 남아있으며, 추후 RTL 수정 시 Python 정수 모델과 클럭 단위 비교 시뮬레이션이 필요하다.
 
 ---
 

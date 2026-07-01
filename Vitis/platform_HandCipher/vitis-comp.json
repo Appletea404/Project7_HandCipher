@@ -3,7 +3,7 @@
   "type": "PLATFORM",
   "configuration": {
     "description": "",
-    "xsa": "/home/kwakyj91/workspace_ondevice_2/project/project_07/Project7_HandCipher/Vivado/TOP/HandCipher/HandCipher_wrapper.xsa",
+    "xsa": "/home/appletea/workspace_onedevice_2/Project_7_HandCipher/Vivado/TOP/HandCipher/HandCipher_wrapper.xsa",
     "xsaPathInPlatform": "platform_HandCipher/hw/HandCipher_wrapper.xsa",
     "emulationXsa": "",
     "emulationXsaPathInPlatform": "",
