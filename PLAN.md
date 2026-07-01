@@ -680,13 +680,22 @@ void display_confirming(u32 base, char inferred, int shift, int mode,
 22. ~~합성 + 구현~~ ✅ **BRAM36: 33/50 (66%), WNS = +0.387ns** (예상 94 BRAM18보다 훨씬 적음)
 23. ~~**File → Export → Export Hardware** → `handcipher.xsa` 생성~~ ✅ (`HandCipher_wrapper.xsa`)
 
-### Phase 4 — Vitis C 코드 (Vitis/) ⏳ 진행 중
+### Phase 4 — Vitis C 코드 (Vitis/) ✅ 완료
 
-24. ~~Vitis에서 handcipher.xsa로 Platform 프로젝트 생성~~ ✅ (`Vitis/platform_HandCipher` 존재)
-25. Application 프로젝트 생성 → `caesar.c` / `caesar.h` ⏳
-26. `display.c` / `display.h` ⏳
-27. `main.c` ⏳
-28. 빌드 + Basys3에 Program Device ⏳
+24. Vitis에서 handcipher.xsa로 Platform 프로젝트 생성 ✅ (Vitis/platform_HandCipher 존재)
+25. Application 프로젝트 생성 → caesar.c / caesar.h ✅ (완료)
+26. display.c / display.h ✅ (완료)
+27. main.c (helloworld.c) ✅ (완료, FSM 및 화면 제어 연결)
+28. 빌드 + Basys3에 Program Device ✅ (UART 제어 메뉴 추가로 GPIO 스위치 부재 우회 완료)
+
+> [!NOTE]
+> **UART 제어 메뉴 추가**
+> TOP Block Design에 AXI GPIO가 배치되지 않아 보드의 물리적 스위치와 버튼을 읽을 수 없는 한계를 우회하기 위해, UARTLite(0x4060_0000)를 통한 **비차단식(non-blocking) 시리얼 명령어 제어**를 구현했습니다.
+> - `+` / `=` : 카이사르 시프트 값(shift) 1 증가
+> - `-` / `_` : 카이사르 시프트 값(shift) 1 감소
+> - `m` / `M` : 암호화(ENCRYPT) / 복호화(DECRYPT) 모드 토글
+> - `r` / `R` : 평문/암호문 버퍼 초기화
+> - `h` / `?` : 현재 설정 및 도움말 출력
 
 ### Phase 5 — 하드웨어 검증 ⏳ 미시작
 

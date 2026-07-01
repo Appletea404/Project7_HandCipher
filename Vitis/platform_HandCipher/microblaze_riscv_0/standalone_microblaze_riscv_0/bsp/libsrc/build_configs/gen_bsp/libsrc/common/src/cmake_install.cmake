@@ -1,4 +1,4 @@
-# Install script for directory: /home/appletea/workspace_onedevice_2/Project_7_HandCipher/Vitis/platform_HandCipher/microblaze_riscv_0/standalone_microblaze_riscv_0/bsp/libsrc/common/src
+# Install script for directory: /home/kwakyj91/workspace_ondevice_2/project/project_07/Project7_HandCipher/Vitis/platform_HandCipher/microblaze_riscv_0/standalone_microblaze_riscv_0/bsp/libsrc/common/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
